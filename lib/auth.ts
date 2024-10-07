@@ -1,7 +1,8 @@
+// src/lib/auth.ts
 import { NextAuthOptions, User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-import bcrypt from "bcryptjs"; 
+import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
 // Extend the built-in session types
@@ -9,14 +10,14 @@ declare module "next-auth" {
   interface Session {
     user: User & {
       id: string;
-      email:string;
+      email: string;
       isAdmin: boolean;
     };
   }
 
   interface User {
     id: string;
-    email:string,
+    email: string;
     isAdmin: boolean;
   }
 }
@@ -42,40 +43,68 @@ export const authConfig: NextAuthOptions = {
           return null;
         }
 
-        // Find user by email in the database
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
         });
 
         if (!user) {
-          return null; // No user found with this email
+          return null;
         }
 
-        // Compare hashed password
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.passwordHash);
+        const isPasswordValid = await bcrypt.compare(
+          credentials.password,
+          user.passwordHash
+        );
 
         if (!isPasswordValid) {
-          return null; // Invalid password
+          return null;
         }
 
-        // Return the user object if authentication is successful
         return {
-          id: user.id.toString(), // Convert to string
+          id: user.id.toString(),
           email: user.email,
           name: user.username,
-          isAdmin: user.isAdmin, 
+          isAdmin: user.isAdmin,
         };
       },
     }),
 
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientSecret: process.env.clientSecret!,
+
+      async profile(profile) {
+        const existingUser = await prisma.user.findUnique({
+          where: { email: profile.email },
+        });
+        console.log("profile------------------>", profile);
+
+        if (!existingUser) {
+          await prisma.user.create({
+            data: {
+              email: profile.email,
+              username: profile.name,
+              passwordHash: "",
+              firstName: "",
+              lastName: "",
+              isAdmin: false,
+            },
+          });
+        }
+
+        return {
+          id: profile.sub,
+          email: profile.email,
+          name: profile.name,
+          isAdmin: false,
+        };
+      },
     }),
   ],
-  
+
   pages: {
-    signIn: "/app/signin",
+    signIn: "/signin",
+    error: "/signin",
   },
 
   callbacks: {

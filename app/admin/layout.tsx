@@ -1,7 +1,17 @@
+import AdminSidebar from "@/components/adminComponents/AdminSidebar";
+import ProtectedAdminPage from "@/components/ProtectedAminRoute";
+
 export default function AdminLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <div className="container my-6">{children}</div>;
+  return (
+    <ProtectedAdminPage>
+      <div className="flex h-screen bg-gray-100">
+        <AdminSidebar />
+        <main className="flex-1 overflow-y-auto p-5">{children}</main>
+      </div>
+    </ProtectedAdminPage>
+  );
 }

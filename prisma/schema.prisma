@@ -1,5 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// This is your improved Prisma schema file
 
 generator client {
   provider = "prisma-client-js"
@@ -11,24 +10,28 @@ datasource db {
 }
 
 model User {
-  id              String            @id @default(uuid())
-  username        String            @unique
-  email           String            @unique
-  passwordHash    String
-  isAdmin         Boolean           @default(false)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  orders          Order[]
-  reviews         Review[]
+  id                String            @id @default(uuid())
+  username          String            @unique
+  email             String            @unique
+  passwordHash      String
+  firstName         String
+  lastName          String
+  phoneNumber       String?
+  isAdmin           Boolean           @default(false)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  orders            Order[]
+  reviews           Review[]
   shippingAddresses ShippingAddress[]
-  cart            Cart?
+  cart              Cart?
+  wishlist          Wishlist?
 }
 
 model Product {
   id              String            @id @default(uuid())
   name            String
   slug            String            @unique
-  image           String
+  images          String[] 
   description     String?
   basePrice       Decimal           @db.Decimal(10, 2)
   discountPrice   Decimal?          @db.Decimal(10, 2)
@@ -36,10 +39,20 @@ model Product {
   status          String            @default("draft")
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
+  brand           Brand             @relation(fields: [brandId], references: [id])
+  brandId         String
   categories      ProductCategory[]
   variants        ProductVariant[]
   reviews         Review[]
-  cartItems       CartItem[]
+  wishlistItems   WishlistItem[]
+}
+
+model Brand {
+  id              String            @id @default(uuid())
+  name            String            @unique
+  logo            String?
+  description     String?
+  products        Product[]
 }
 
 model Category {
@@ -95,6 +108,10 @@ model Order {
   totalAmount     Decimal           @db.Decimal(10, 2)
   quantity        Int
   trackingNumber  String?
+  shippingAddress ShippingAddress   @relation(fields: [shippingAddressId], references: [id])
+  shippingAddressId String
+  paymentMethod   PaymentMethod     @relation(fields: [paymentMethodId], references: [id])
+  paymentMethodId String
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   orderItems      OrderItem[]
@@ -123,6 +140,7 @@ model ShippingAddress {
   country         String
   phoneNumber     String?
   default         Boolean           @default(false)
+  orders          Order[]
 }
 
 model Review {
@@ -140,11 +158,13 @@ model Review {
 model Coupon {
   id              String            @id @default(uuid())
   code            String            @unique
-  discountPercent Decimal           @db.Decimal(5, 2)
+  discountType    String            // 'percentage' or 'fixed'
+  discountValue   Decimal           @db.Decimal(10, 2)
   validFrom       DateTime
   validTo         DateTime
   isActive        Boolean           @default(true)
-  used            Boolean           @default(false)
+  usageLimit      Int?              // null means unlimited
+  usageCount      Int               @default(0)
 }
 
 model Cart {
@@ -163,8 +183,36 @@ model CartItem {
   variant         ProductVariant    @relation(fields: [variantId], references: [id])
   variantId       String
   quantity        Int
-  product         Product           @relation(fields: [productId], references: [id])
-  productId       String
 
   @@unique([cartId, variantId])
+}
+
+model PaymentMethod {
+  id              String            @id @default(uuid())
+  type            String            // e.g., 'credit_card', 'paypal', 'bank_transfer'
+  provider        String?           // e.g., 'visa', 'mastercard', 'paypal'
+  accountNumber   String?           // Last 4 digits for credit cards
+  expiryDate      DateTime?         // For credit cards
+  isDefault       Boolean           @default(false)
+  orders          Order[]
+}
+
+model Wishlist {
+  id              String            @id @default(uuid())
+  user            User              @relation(fields: [userId], references: [id])
+  userId          String            @unique
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  wishlistItems   WishlistItem[]
+}
+
+model WishlistItem {
+  id              String            @id @default(uuid())
+  wishlist        Wishlist          @relation(fields: [wishlistId], references: [id])
+  wishlistId      String
+  product         Product           @relation(fields: [productId], references: [id])
+  productId       String
+  addedAt         DateTime          @default(now())
+
+  @@unique([wishlistId, productId])
 }

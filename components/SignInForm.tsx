@@ -1,14 +1,15 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react"; 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/ui/icons";
 import { useRouter } from "next/navigation";
 import { CardContent } from "@/components/ui/card";
-import { useSetRecoilState } from "recoil";
-import { loadingState, userState, User } from "@/stores/atoms/userStateAtom";
+import { useRecoilState, useSetRecoilState } from "recoil";
+import { loadingState, userState } from "@/stores/atoms/userStateAtom";
+import { SafeUser } from "@/lib/types/schemaTypes";
 
 type FormData = {
   email: string;
@@ -22,7 +23,7 @@ const SignInForm = () => {
     formState: { errors },
   } = useForm<FormData>();
   const router = useRouter();
-  const setLoading = useSetRecoilState(loadingState);
+  const [loading, setLoading] = useRecoilState(loadingState);
   const setUser = useSetRecoilState(userState);
 
   const onSubmit = async (data: FormData) => {
@@ -35,11 +36,19 @@ const SignInForm = () => {
     });
 
     if (res?.ok) {
-      setUser({ email: data.email } as User);
-      router.push("/dashboard");
+      setUser({ email: data.email } as SafeUser);
+
+      const updatedSession = await getSession();
+
+      if (updatedSession?.user?.isAdmin) {
+        router.push("/admin");
+      } else {
+        router.push("/");
+      }
     } else {
       console.error("Error signing in");
     }
+
     setLoading(false);
   };
 
@@ -75,7 +84,7 @@ const SignInForm = () => {
           )}
         </div>
         <Button type="submit" className="w-full">
-          Sign in
+          {loading ? "...Loading" : "Sign in"}
         </Button>
         <Button
           variant="secondary"

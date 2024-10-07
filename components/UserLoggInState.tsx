@@ -1,34 +1,34 @@
 "use client";
 
-import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { userState } from '@/stores/atoms/userStateAtom';
+import { useSession, signOut } from 'next-auth/react';
 import { Button } from "@/components/ui/button";
 import { User, LogOut } from 'lucide-react';
 import Link from 'next/link';
-import { useTransition } from 'react';
-import { signOutAction } from '@/app/actions/signoutAction';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function UserLoginState() {
-  const user = useRecoilValue(userState);
-  const setUser = useSetRecoilState(userState);
-  const [isPending, startTransition] = useTransition();
-  const router =  useRouter();
+  const { data: session, status } = useSession();
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const router = useRouter();
 
-
-  const handleSignOut = () => {
-    startTransition(async () => {
-      const result = await signOutAction();
-      if (result.success) {
-        setUser(null);
-        router.push("/signin");
-      } else {
-        console.error(result.error);
-      }
-    });
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      await signOut({ redirect: false });
+      router.push("/signin");
+    } catch (error) {
+      console.error("Sign out error:", error);
+    } finally {
+      setIsSigningOut(false);
+    }
   };
 
-  if (!user) {
+  if (status === "loading") {
+    return <Button variant="ghost">Loading...</Button>;
+  }
+
+  if (!session) {
     return (
       <Link href="/signin">
         <Button variant="ghost">Sign In</Button>
@@ -41,11 +41,11 @@ export default function UserLoginState() {
       <Button variant="ghost" size="icon">
         <User className="h-5 w-5" />
       </Button>
-      <Button 
-        variant="ghost" 
-        size="icon" 
+      <Button
+        variant="ghost"
+        size="icon"
         onClick={handleSignOut}
-        disabled={isPending}
+        disabled={isSigningOut}
       >
         <LogOut className="h-5 w-5" />
       </Button>
