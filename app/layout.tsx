@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Providers } from "./Providers";
+import Footer from "@/components/Footer";
 // import ProtectedRoutes from "@/components/ProtectedRoute";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -37,6 +38,7 @@ export default async function RootLayout({
           )}
            {/* <ProtectedRoutes> */}
           <main className="mx-auto">{children}</main>
+          <Footer/>
           {/* </ProtectedRoutes> */}
         </Providers>
       </body>
