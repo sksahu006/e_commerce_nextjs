@@ -86,7 +86,7 @@ export default function CheckoutCart() {
         <div className="lg:w-1/3">
           <div className="bg-gray-50 rounded-lg p-6 sticky top-4">
             <h2 className="text-2xl font-semibold mb-4 uppercase font-TwentiethCenturyforKenmoreLight tracking-[0.1em] ">Order Summary</h2>
-            <div className="space-y-2 mb-4">
+            <div className="space-y-2 mb-4 font-TwentiethCenturyforKenmoreLight">
               <div className="flex justify-between">
                 <span>Items ({itemCount}):</span>
                 <span>₹{subtotal.toFixed(2)}</span>
@@ -104,7 +104,7 @@ export default function CheckoutCart() {
               <Input placeholder="Enter promo code" />
             </div>
             <Button className="w-full font-TwentiethCenturyforKenmoreLight uppercase h-14 text-xl font-bold tracking-[0.1em] text-white">
-              Proceed to Checkout
+              Proceed to Checkout 
             </Button>
           </div>
         </div>
