@@ -49,3 +49,10 @@ export const sizeSchema = z.object({
 });
 
 export type sizeFormData = z.infer<typeof sizeSchema>;
+
+export const categorySchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional(),
+});
+
+export type catrgoryFormData = z.infer<typeof categorySchema>;

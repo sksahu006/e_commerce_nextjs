@@ -1,3 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -76,6 +80,27 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
+ 
+  @font-face {
+    font-family: 'Thunder LC';
+    src: url('/fonts/Thunder-BoldLC.ttf') format('truetype');
+    font-weight: 800;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: 'ShackletonTest';
+    src: url('/fonts/ShackletonTest-Regular.otf') format('truetype');
+    font-weight: 800;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: 'TwentiethCenturyforKenmoreLight';
+    src: url('/fonts/TwentiethCenturyforKenmoreLight.ttf') format('truetype');
+    font-weight: 800;
+    font-style: normal;
+  
+  }
+
 }
 
 @layer base {
@@ -84,5 +109,7 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Thunder LC', sans-serif;
   }
 }
+

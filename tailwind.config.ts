@@ -10,9 +10,7 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      fontFamily: {
-        sans: ["var(--font-sans)", ...fontFamily.sans],
-      },
+     
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
@@ -65,8 +63,18 @@ const config: Config = {
           "5": "hsl(var(--chart-5))",
         },
       },
+      fontFamily: {
+        'thunder-lc': ['"Thunder LC"', 'sans-serif'],
+        'ShackletonTest': ['"ShackletonTest"', 'sans-serif'],
+        'DM-sans': ['"DM Sans"', 'sans-serif'],
+        'Raleway': ['"Raleway"', 'sans-serif'],
+        'TwentiethCenturyforKenmoreLight': ['"TwentiethCenturyforKenmoreLight"', 'sans-serif'],
+        'Oswald': ['Oswald', 'sans-serif'],
+      },
     },
+   
   },
+
   plugins: [require("tailwindcss-animate")],
 };
 export default config;

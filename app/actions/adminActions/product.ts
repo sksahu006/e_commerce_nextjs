@@ -101,8 +101,15 @@ export async function fetchProducts(page = 1, limit = 10, search = '') {
     }),
   ])
 
+  // Convert Decimal fields to number
+  const formattedProducts = products.map(product => ({
+    ...product,
+    basePrice: Number(product.basePrice),  // Convert basePrice from Decimal to number
+    discountPrice: product.discountPrice ? Number(product.discountPrice) : null,  // Convert if necessary
+  }))
+
   return {
-    products,
+    products: formattedProducts,
     total,
     page,
     limit,

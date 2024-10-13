@@ -1,61 +1,128 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { addProduct } from '@/app/actions/adminActions/product'
-import { ProductFormData, ProductSchema } from '@/lib/types/validationTypes'
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ProductSchema, ProductFormData } from "@/lib/types/validationTypes";
+import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { addProduct, updateProduct } from "@/app/actions/adminActions/product";
+import { Brand, Category } from "@/lib/types/schemaTypes";
 
-export function AddProduct() {
-  const [open, setOpen] = useState(false)
+type FetchedProductData = {
+  id: string;
+  name: string;
+  slug: string;
+  images: string[];
+  description: string | null;
+  basePrice: number;
+  discountPrice: number | null;
+  featured: boolean;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  brand: Omit<Brand, "products">;
+  brandId: string;
+  categories: Array<{
+    category: Omit<Category, "products">;
+    productId: string;
+    categoryId: string;
+  }>;
+};
+
+export function ProductFormModal({
+  product,
+  onClose,
+}: {
+  product?: FetchedProductData;
+  onClose: () => void;
+}) {
+  const queryClient = useQueryClient();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<ProductFormData>({
     resolver: zodResolver(ProductSchema),
-    defaultValues: {
-      name: '',
-      slug: '',
-      images: [],
-      description: '',
-      basePrice: 0,
-      discountPrice: undefined,
-      featured: false,
-      status: 'draft',
-      brandId: '',
-      categoryIds: [],
-    },
-  })
+    defaultValues: product
+      ? {
+          name: product.name,
+          slug: product.slug,
+          images: product.images,
+          description: product.description || "",
+          basePrice: product.basePrice,
+          discountPrice: product.discountPrice || undefined,
+          featured: product.featured,
+          status: product.status as "draft" | "published",
+          brandId: product.brandId,
+          categoryIds: product.categories.map((pc) => pc.categoryId),
+        }
+      : {
+          name: "",
+          slug: "",
+          images: [],
+          description: "",
+          basePrice: 0,
+          discountPrice: undefined,
+          featured: false,
+          status: "draft",
+          brandId: "",
+          categoryIds: [],
+        },
+  });
 
-  const onSubmit = async (values: ProductFormData) => {
-    const result = await addProduct(values)
-    if (result.success) {
-      setOpen(false)
-      form.reset()
-    } else {
-      // Handle errors
+  const onSubmit = async (data: ProductFormData) => {
+    setIsSubmitting(true);
+    try {
+      if (product) {
+        await updateProduct(product.id, data);
+      } else {
+        await addProduct(data);
+      }
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      onClose();
+    } catch (error) {
+      console.error("Error submitting product:", error);
+    } finally {
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>Add Product</Button>
-      </DialogTrigger>
+    <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add Product</DialogTitle>
-          <DialogDescription>
-            Add a new product to your inventory. Click save when you're done.
-          </DialogDescription>
+          <DialogTitle>
+            {product ? "Edit Product" : "Add New Product"}
+          </DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 max-h-[70vh] overflow-y-scroll"
+          >
             <FormField
               control={form.control}
               name="name"
@@ -63,7 +130,7 @@ export function AddProduct() {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Product name" {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -76,7 +143,7 @@ export function AddProduct() {
                 <FormItem>
                   <FormLabel>Slug</FormLabel>
                   <FormControl>
-                    <Input placeholder="product-slug" {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -87,11 +154,16 @@ export function AddProduct() {
               name="images"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Images</FormLabel>
+                  <FormLabel>Images (comma-separated URLs)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Image URL" {...field} />
+                    <Input
+                      {...field}
+                      value={field.value.join(",")}
+                      onChange={(e) =>
+                        field.onChange(e.target.value.split(","))
+                      }
+                    />
                   </FormControl>
-                  <FormDescription>Enter image URLs separated by commas</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -103,7 +175,7 @@ export function AddProduct() {
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Product description" {...field} />
+                    <Textarea {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -116,7 +188,13 @@ export function AddProduct() {
                 <FormItem>
                   <FormLabel>Base Price</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="0.00" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} />
+                    <Input
+                      type="number"
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(parseFloat(e.target.value))
+                      }
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -127,9 +205,20 @@ export function AddProduct() {
               name="discountPrice"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Discount Price</FormLabel>
+                  <FormLabel>Discount Price (optional)</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="0.00" {...field} onChange={e => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)} />
+                    <Input
+                      type="number"
+                      {...field}
+                      value={field.value === undefined ? "" : field.value}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value === ""
+                            ? undefined
+                            : parseFloat(e.target.value)
+                        )
+                      }
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -139,21 +228,16 @@ export function AddProduct() {
               control={form.control}
               name="featured"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">Featured</FormLabel>
+                  </div>
                   <FormControl>
-                    <Checkbox
+                    <Switch
                       checked={field.value}
                       onCheckedChange={field.onChange}
                     />
                   </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>
-                      Featured
-                    </FormLabel>
-                    <FormDescription>
-                      This product will appear on the home page
-                    </FormDescription>
-                  </div>
                 </FormItem>
               )}
             />
@@ -163,7 +247,10 @@ export function AddProduct() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Status</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a status" />
@@ -183,19 +270,10 @@ export function AddProduct() {
               name="brandId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Brand</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a brand" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {/* You would populate this with actual brand data */}
-                      <SelectItem value="brand-1">Brand 1</SelectItem>
-                      <SelectItem value="brand-2">Brand 2</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>Brand ID</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -205,29 +283,26 @@ export function AddProduct() {
               name="categoryIds"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Categories</FormLabel>
-                  <Select onValueChange={(value) => field.onChange([...field.value, value])} defaultValue={field.value[0]}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select categories" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {/* You would populate this with actual category data */}
-                      <SelectItem value="category-1">Category 1</SelectItem>
-                      <SelectItem value="category-2">Category 2</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>Category IDs (comma-separated)</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      value={field.value.join(",")}
+                      onChange={(e) =>
+                        field.onChange(e.target.value.split(","))
+                      }
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <DialogFooter>
-              <Button type="submit">Save changes</Button>
-            </DialogFooter>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : "Save"}
+            </Button>
           </form>
         </Form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
