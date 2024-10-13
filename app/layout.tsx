@@ -6,7 +6,6 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Providers } from "./Providers";
 import Footer from "@/components/Footer";
-// import ProtectedRoutes from "@/components/ProtectedRoute";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -20,10 +19,15 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const pathname = headers().get("x-pathname") || "/"; 
+  const headersList = headers();
+  const referer = headersList.get("referer");
+  
+  const url = referer ? new URL(referer) : { pathname: "/" };
+  const pathname = url.pathname || "/";
+  console.log("pathname====================>",pathname)
 
   const noNavbarRoutes = ["/signin", "/signup", "/admin"];
-
+console.log("noNavbarRoutes.includes(pathname) || pathname?.startsWith=====================>",noNavbarRoutes.includes(pathname) || pathname?.startsWith("/admin"))
   return (
     <html lang="en">
       <body
@@ -33,13 +37,13 @@ export default async function RootLayout({
         )}
       >
         <Providers>
-          {!noNavbarRoutes.includes(pathname) && (
-            <Navbar pathname={pathname} />
-          )}
-           {/* <ProtectedRoutes> */}
+          {!(
+            noNavbarRoutes.includes(pathname) || pathname?.startsWith("/admin")
+          ) && <Navbar pathname={pathname} />}
           <main className="mx-auto">{children}</main>
-          <Footer/>
-          {/* </ProtectedRoutes> */}
+          {!(
+            noNavbarRoutes.includes(pathname) || pathname?.startsWith("/admin")
+          ) && <Footer />}
         </Providers>
       </body>
     </html>

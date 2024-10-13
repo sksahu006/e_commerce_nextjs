@@ -1,7 +1,6 @@
 "use client";
-
 import { useForm } from "react-hook-form";
-import { signIn, getSession } from "next-auth/react"; 
+import { signIn, useSession } from "next-auth/react"; 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/ui/icons";
@@ -10,6 +9,7 @@ import { CardContent } from "@/components/ui/card";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { loadingState, userState } from "@/stores/atoms/userStateAtom";
 import { SafeUser } from "@/lib/types/schemaTypes";
+import { useEffect } from "react";
 
 type FormData = {
   email: string;
@@ -25,31 +25,40 @@ const SignInForm = () => {
   const router = useRouter();
   const [loading, setLoading] = useRecoilState(loadingState);
   const setUser = useSetRecoilState(userState);
+  const { data: session, status } = useSession();
 
-  const onSubmit = async (data: FormData) => {
-    setLoading(true);
-
-    const res = await signIn("credentials", {
-      redirect: false,
-      email: data.email,
-      password: data.password,
-    });
-
-    if (res?.ok) {
-      setUser({ email: data.email } as SafeUser);
-
-      const updatedSession = await getSession();
-
-      if (updatedSession?.user?.isAdmin) {
+  useEffect(() => {
+    if (status === 'authenticated') {
+      setUser(session.user as SafeUser);
+      if (session.user?.isAdmin) {
         router.push("/admin");
       } else {
         router.push("/");
       }
-    } else {
-      console.error("Error signing in");
     }
+  }, [status, session, setUser, router]);
 
-    setLoading(false);
+  const onSubmit = async (data: FormData) => {
+    setLoading(true);
+    try {
+      const res = await signIn("credentials", {
+        redirect: false,
+        email: data.email,
+        password: data.password,
+      });
+      if (!res?.ok) {
+        throw new Error("Failed to sign in");
+      }
+    } catch (error) {
+      console.error("Error signing in:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = () => {
+    setLoading(true);
+    signIn("google");
   };
 
   return (
@@ -83,13 +92,14 @@ const SignInForm = () => {
             <p className="text-red-500 text-sm">{errors.password.message}</p>
           )}
         </div>
-        <Button type="submit" className="w-full">
-          {loading ? "...Loading" : "Sign in"}
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? "Signing in..." : "Sign in"}
         </Button>
         <Button
           variant="secondary"
           className="w-full flex items-center justify-center gap-2"
-          onClick={() => signIn("google")}
+          onClick={handleGoogleSignIn}
+          disabled={loading}
         >
           <Icons.google />
           Sign in with Google

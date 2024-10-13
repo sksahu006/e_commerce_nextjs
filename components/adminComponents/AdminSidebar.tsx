@@ -1,5 +1,11 @@
 import Link from "next/link";
-import { LayoutDashboard, Package, ShoppingCart, Users } from "lucide-react";
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingCart,
+  Users,
+  ChartBarStacked,
+} from "lucide-react";
 import { AdminLogout } from "./AdminLogout";
 
 const links = [
@@ -7,6 +13,7 @@ const links = [
   { href: "/admin/products", label: "Products", Icon: Package },
   { href: "/admin/orders", label: "Orders", Icon: ShoppingCart },
   { href: "/admin/users", label: "Users", Icon: Users },
+  { href: "/admin/categories", label: "Categories", Icon: ChartBarStacked },
 ];
 
 export default function AdminSidebar() {

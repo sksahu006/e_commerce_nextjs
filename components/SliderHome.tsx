@@ -25,13 +25,13 @@ const SliderHome = () => {
         className="h-[500px] w-full"
       >
         <SwiperSlide className='h-full w-full p-1'>
-          <img src={img} alt='k' height={200} width={200} className=' w-full h-full ' />
+          <img src={img} alt='k' height={200} width={200} className=' w-full h-full object-fill' />
         </SwiperSlide>
-        <SwiperSlide><img src={img1} alt='k' height={200} width={200} className=' w-full h-full ' /></SwiperSlide>
-        <SwiperSlide><img src={img} alt='k' height={200} width={200} className=' w-full h-full ' /></SwiperSlide>
-        <SwiperSlide><img src={img2} alt='k' height={200} width={200} className=' w-full h-full ' /></SwiperSlide>
-        <SwiperSlide><img src={img1} alt='k' height={200} width={200} className=' w-full h-full ' /></SwiperSlide>
-        <SwiperSlide><img src={img3} alt='k' height={200} width={200} className=' w-full h-full ' />6</SwiperSlide>
+        <SwiperSlide><img src={img1} alt='k' height={200} width={200} className=' w-full h-full object-fill' /></SwiperSlide>
+        <SwiperSlide><img src={img} alt='k' height={200} width={200} className=' w-full h-full object-fill' /></SwiperSlide>
+        <SwiperSlide><img src={img2} alt='k' height={200} width={200} className=' w-full h-full object-fill' /></SwiperSlide>
+        <SwiperSlide><img src={img1} alt='k' height={200} width={200} className=' w-full h-full object-fill' /></SwiperSlide>
+        <SwiperSlide><img src={img3} alt='k' height={200} width={200} className=' w-full h-full object-fill' />6</SwiperSlide>
 
       </Swiper>
     </>

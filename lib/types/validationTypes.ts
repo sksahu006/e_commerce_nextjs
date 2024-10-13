@@ -11,20 +11,48 @@ export const SignUpSchema = z.object({
 
 export type SignUpFormData = z.infer<typeof SignUpSchema>;
 
-export const productSchema = z.object({
+export const ProductSchema = z.object({
   name: z.string().min(1, "Name is required"),
   slug: z.string().min(1, "Slug is required"),
-  images: z
-    .array(z.string().url("Invalid image URL"))
-    .min(1, "At least one image is required"),
+  images: z.array(z.string().url()).min(1, "At least one image is required"),
+  description: z.string().optional(),
   basePrice: z.number().positive("Base price must be positive"),
   discountPrice: z
     .number()
     .positive("Discount price must be positive")
     .optional(),
-  brand: z.string().min(1, "Brand is required"),
-  categories: z.array(z.string()).min(1, "At least one category is required"),
+  featured: z.boolean().optional(),
   status: z.enum(["draft", "published"]),
+  brandId: z.string().uuid("Invalid brand ID"),
+  categoryIds: z.array(z.string().uuid("Invalid category ID")),
 });
 
-export type ProductFormData = z.infer<typeof productSchema>;
+export type ProductFormData = z.infer<typeof ProductSchema>;
+
+export const brandSchema = z.object({
+  name: z.string().nonempty("Brand name is required"),
+  logo: z.string().optional(),
+  description: z.string().optional(),
+});
+
+export type BrandFormData = z.infer<typeof brandSchema>;
+
+export const colorSchema = z.object({
+  name: z.string().nonempty("Color name is required"),
+  hexCode: z.string().regex(/^#[0-9A-F]{6}$/i, "Invalid hex code"),
+});
+
+export type colorFormData = z.infer<typeof colorSchema>;
+
+export const sizeSchema = z.object({
+  name: z.string().nonempty("Size name is required"),
+});
+
+export type sizeFormData = z.infer<typeof sizeSchema>;
+
+export const categorySchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional(),
+});
+
+export type catrgoryFormData = z.infer<typeof categorySchema>;
