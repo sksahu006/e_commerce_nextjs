@@ -9,11 +9,13 @@ export async function addProduct(data: ProductFormData) {
   try {
     const parsedData = ProductSchema.parse(data);
 
+    const { categoryIds, ...productData } = parsedData;
+
     const product = await prisma.product.create({
       data: {
-        ...parsedData,
+        ...productData,
         categories: {
-          create: parsedData.categoryIds.map((categoryId) => ({
+          create: categoryIds.map((categoryId) => ({
             category: { connect: { id: categoryId } },
           })),
         },
@@ -23,6 +25,7 @@ export async function addProduct(data: ProductFormData) {
     revalidatePath("/admin/product");
     return { success: true, product };
   } catch (error) {
+    console.error("Error in addProduct:", error);
     if (error instanceof z.ZodError) {
       return { success: false, errors: error.errors };
     }
@@ -34,13 +37,15 @@ export async function updateProduct(id: string, data: ProductFormData) {
   try {
     const parsedData = ProductSchema.parse(data);
 
+    const { categoryIds, ...productData } = parsedData;
+
     const product = await prisma.product.update({
       where: { id },
       data: {
-        ...parsedData,
+        ...productData,
         categories: {
           deleteMany: {},
-          create: parsedData.categoryIds.map((categoryId) => ({
+          create: categoryIds.map((categoryId) => ({
             category: { connect: { id: categoryId } },
           })),
         },
@@ -50,6 +55,7 @@ export async function updateProduct(id: string, data: ProductFormData) {
     revalidatePath("/admin/product");
     return { success: true, product };
   } catch (error) {
+    console.error("Error in updateProduct:", error);
     if (error instanceof z.ZodError) {
       return { success: false, errors: error.errors };
     }

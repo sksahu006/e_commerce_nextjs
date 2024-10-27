@@ -65,10 +65,21 @@ export type Size = {
   variants: ProductVariant[];
 };
 
+export type SizeTableItem = {
+  id: string;
+  name: string;
+};
+
+export type ColorTableItem = {
+  id: string;
+  name: string;
+  hexCode: string;
+};
+
 export type Color = {
   id: string;
   name: string;
-  hexCode: string; // Unique
+  hexCode: string;
   variants: ProductVariant[];
 };
 
