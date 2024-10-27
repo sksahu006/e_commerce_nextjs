@@ -3,6 +3,8 @@ import {
   LayoutDashboard,
   Package,
   ShoppingCart,
+  Palette,
+  Layers2,
   Users,
   ChartBarStacked,
 } from "lucide-react";
@@ -11,6 +13,8 @@ import { AdminLogout } from "./AdminLogout";
 const links = [
   { href: "/admin", label: "Dashboard", Icon: LayoutDashboard },
   { href: "/admin/products", label: "Products", Icon: Package },
+  { href: "/admin/sizes-colors", label: "Size&Color", Icon: Palette },
+  { href: "/admin/product-variants", label: "Product Variants", Icon: Layers2 },
   { href: "/admin/orders", label: "Orders", Icon: ShoppingCart },
   { href: "/admin/users", label: "Users", Icon: Users },
   { href: "/admin/categories", label: "Categories", Icon: ChartBarStacked },
