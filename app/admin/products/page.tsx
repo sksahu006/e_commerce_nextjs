@@ -2,7 +2,6 @@ import { AddProductButton } from '@/components/adminComponents/products/AddProdu
 import { ProductSearch } from '@/components/adminComponents/products/ProductSearch';
 import { ProductList } from '@/components/adminComponents/products/ProductTable';
 import { Suspense } from 'react'
-// import { Pagination } from 'swiper/modules';
 
 export default function ProductPage({ 
   searchParams 
@@ -22,7 +21,6 @@ export default function ProductPage({
       <Suspense fallback={<div>Loading products...</div>}>
         <ProductList page={page} search={search} />
       </Suspense>
-      {/* <Pagination /> */}
     </div>
   )
 }

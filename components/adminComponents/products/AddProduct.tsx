@@ -1,6 +1,5 @@
-"use client";
-
-import { useForm } from "react-hook-form";
+import React, { useState, useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
@@ -29,9 +28,11 @@ import {
 } from "@/components/ui/select";
 import { ProductSchema, ProductFormData } from "@/lib/types/validationTypes";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
 import { addProduct, updateProduct } from "@/app/actions/adminActions/product";
 import { Brand, Category } from "@/lib/types/schemaTypes";
+import { Loader2 } from "lucide-react";
+import ImageUpload from "../ImageUpload";
+import Image from "next/image";
 
 type FetchedProductData = {
   id: string;
@@ -63,6 +64,8 @@ export function ProductFormModal({
 }) {
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const form = useForm<ProductFormData>({
     resolver: zodResolver(ProductSchema),
@@ -93,12 +96,38 @@ export function ProductFormModal({
         },
   });
 
+  useEffect(() => {
+    const fetchBrandsAndCategories = async () => {
+      try {
+        const [brandsResponse, categoriesResponse] = await Promise.all([
+          fetch("/api/brands"),
+          fetch("/api/category"),
+        ]);
+
+        if (!brandsResponse.ok || !categoriesResponse.ok) {
+          throw new Error("Failed to fetch data");
+        }
+
+        const brandsData = await brandsResponse.json();
+        const categoriesData = await categoriesResponse.json();
+
+        setBrands(brandsData);
+        setCategories(categoriesData.categories);
+      } catch (error) {
+        console.error("Error fetching brands and categories:", error);
+      }
+    };
+
+    fetchBrandsAndCategories();
+  }, []);
+
   const onSubmit = async (data: ProductFormData) => {
     setIsSubmitting(true);
     try {
       if (product) {
         await updateProduct(product.id, data);
       } else {
+        console.log("adding is called");
         await addProduct(data);
       }
       queryClient.invalidateQueries({ queryKey: ["products"] });
@@ -110,9 +139,14 @@ export function ProductFormModal({
     }
   };
 
+  const handleImageUpload = (url: string) => {
+    const currentImages = form.getValues("images");
+    form.setValue("images", [...currentImages, url]);
+  };
+
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
             {product ? "Edit Product" : "Add New Product"}
@@ -121,7 +155,7 @@ export function ProductFormModal({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4 max-h-[70vh] overflow-y-scroll"
+            className="space-y-4 max-h-[70vh] overflow-y-scroll p-2"
           >
             <FormField
               control={form.control}
@@ -154,15 +188,33 @@ export function ProductFormModal({
               name="images"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Images (comma-separated URLs)</FormLabel>
+                  <FormLabel>Images</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      value={field.value.join(",")}
-                      onChange={(e) =>
-                        field.onChange(e.target.value.split(","))
-                      }
-                    />
+                    <div>
+                      <ImageUpload onImageUpload={handleImageUpload} />
+                      {field.value.map((url, index) => (
+                        <div key={index} className="mt-2 flex items-center">
+                          <Image
+                            src={url}
+                            alt={`Uploaded ${index}`}
+                            width={100}
+                            height={100}
+                          />
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            className="ml-2"
+                            onClick={() => {
+                              const newImages = [...field.value];
+                              newImages.splice(index, 1);
+                              form.setValue("images", newImages);
+                            }}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -270,10 +322,24 @@ export function ProductFormModal({
               name="brandId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Brand ID</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
+                  <FormLabel>Brand</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a brand" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {brands.map((brand) => (
+                        <SelectItem key={brand.id} value={brand.id}>
+                          {brand.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -283,22 +349,61 @@ export function ProductFormModal({
               name="categoryIds"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Category IDs (comma-separated)</FormLabel>
+                  <FormLabel>Categories</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      value={field.value.join(",")}
-                      onChange={(e) =>
-                        field.onChange(e.target.value.split(","))
+                    <Select
+                      onValueChange={(value) =>
+                        field.onChange([...field.value, value])
                       }
-                    />
+                      value=""
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select categories" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </FormControl>
+                  <div>
+                    {field.value.map((categoryId) => {
+                      const category = categories.find(
+                        (c) => c.id === categoryId
+                      );
+                      return category ? (
+                        <div key={categoryId}>
+                          {category.name}
+                          <Button
+                            onClick={() => {
+                              const newCategories = field.value.filter(
+                                (id) => id !== categoryId
+                              );
+                              field.onChange(newCategories);
+                            }}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      ) : null;
+                    })}
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Save"}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save"
+              )}
             </Button>
           </form>
         </Form>
@@ -306,3 +411,5 @@ export function ProductFormModal({
     </Dialog>
   );
 }
+
+export default ProductFormModal;

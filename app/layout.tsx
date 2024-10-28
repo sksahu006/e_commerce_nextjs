@@ -24,10 +24,8 @@ export default async function RootLayout({
   
   const url = referer ? new URL(referer) : { pathname: "/" };
   const pathname = url.pathname || "/";
-  console.log("pathname====================>",pathname)
 
   const noNavbarRoutes = ["/signin", "/signup", "/admin"];
-console.log("noNavbarRoutes.includes(pathname) || pathname?.startsWith=====================>",noNavbarRoutes.includes(pathname) || pathname?.startsWith("/admin"))
   return (
     <html lang="en">
       <body
