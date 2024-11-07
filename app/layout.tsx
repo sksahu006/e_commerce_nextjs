@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 import { Providers } from "./Providers";
 import Footer from "@/components/Footer";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { Suspense } from "react";
+
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -22,7 +24,7 @@ export default async function RootLayout({
 }>) {
   const headersList = headers();
   const referer = headersList.get("referer");
-  
+
   // If referer is not available, assume root path
   const url = referer ? new URL(referer) : { pathname: "/" };
   const pathname = url.pathname || "/";
@@ -43,7 +45,9 @@ export default async function RootLayout({
         <Providers>
           {!hideNavbar && <Navbar pathname={pathname} />}
           <LoadingSpinner />
-          <main className="mx-auto">{children}</main>
+          <Suspense fallback={<>...loading</>}>
+            <main className="mx-auto">{children}</main>
+          </Suspense>
           {!hideNavbar && <Footer />}
         </Providers>
       </body>
