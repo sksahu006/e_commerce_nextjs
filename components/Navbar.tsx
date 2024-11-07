@@ -6,9 +6,9 @@ import { usePathname } from "next/navigation";
 
 export default function Navbar({ pathname }: { pathname: string }) {
   const navItems = [
-    { href: "/men", label: "Men" },
-    { href: "/women", label: "Women" },
-    { href: "/plain-collections", label: "Plain Collections" },
+    { href: "/products", label: "Men" },
+    { href: "/cart", label: "Women" },
+    { href: "/wishlist", label: "Plain Collections" },
     { href: "/pick-any-2-combo", label: "Pick Any 2 Combo" },
     { href: "/oversized-t-shirts", label: "Oversized T-Shirts" },
   ];
