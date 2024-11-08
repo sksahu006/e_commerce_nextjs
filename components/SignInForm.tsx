@@ -8,8 +8,8 @@ import { useRouter } from "next/navigation";
 import { CardContent } from "@/components/ui/card";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { loadingState, userState } from "@/stores/atoms/userStateAtom";
-import { SafeUser } from "@/lib/types/schemaTypes";
-import { useEffect } from "react";
+import { SafeUser  } from "@/lib/types/schemaTypes";
+import { useEffect, useState } from "react";
 
 type FormData = {
   email: string;
@@ -24,22 +24,24 @@ const SignInForm = () => {
   } = useForm<FormData>();
   const router = useRouter();
   const [loading, setLoading] = useRecoilState(loadingState);
-  const setUser = useSetRecoilState(userState);
+  const setUser  = useSetRecoilState(userState);
   const { data: session, status } = useSession();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === 'authenticated') {
-      setUser(session.user as SafeUser);
+      setUser (session.user as SafeUser );
       if (session.user?.isAdmin) {
         router.push("/admin");
       } else {
         router.push("/");
       }
     }
-  }, [status, session, setUser, router]);
+  }, [status, session, setUser , router]);
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
+    setErrorMessage(null); 
     try {
       const res = await signIn("credentials", {
         redirect: false,
@@ -47,10 +49,15 @@ const SignInForm = () => {
         password: data.password,
       });
       if (!res?.ok) {
-        throw new Error("Failed to sign in");
+        if (res?.error) {
+          setErrorMessage(res.error);
+        } else {
+          setErrorMessage("Failed to sign in");
+        }
       }
     } catch (error) {
       console.error("Error signing in:", error);
+      setErrorMessage("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -92,6 +99,9 @@ const SignInForm = () => {
             <p className="text-red-500 text-sm">{errors.password.message}</p>
           )}
         </div>
+        {errorMessage && (
+          <p className="text-red-500 text-sm">{errorMessage}</p>
+        )}
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? "Signing in..." : "Sign in"}
         </Button>

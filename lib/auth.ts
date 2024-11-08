@@ -77,7 +77,6 @@ export const authConfig: NextAuthOptions = {
         const existingUser = await prisma.user.findUnique({
           where: { email: profile.email },
         });
-        console.log("profile------------------>", profile);
 
         if (!existingUser) {
           await prisma.user.create({

@@ -1,12 +1,9 @@
-import Navbar from "@/components/Navbar";
 import { headers } from "next/headers";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Providers } from "./Providers";
-import Footer from "@/components/Footer";
-import LoadingSpinner from "@/components/LoadingSpinner";
 import { Suspense } from "react";
 
 
@@ -43,12 +40,12 @@ export default async function RootLayout({
         )}
       >
         <Providers>
-          {!hideNavbar && <Navbar pathname={pathname} />}
-          <LoadingSpinner />
+          {/* {!hideNavbar && <Navbar pathname={pathname} />} */}
+          {/* <LoadingSpinner /> */}
           <Suspense fallback={<>...loading</>}>
             <main className="mx-auto">{children}</main>
           </Suspense>
-          {!hideNavbar && <Footer />}
+          {/* {!hideNavbar && <Footer />} */}
         </Providers>
       </body>
     </html>

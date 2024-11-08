@@ -1,15 +1,16 @@
-import { AddProductButton } from '@/components/adminComponents/products/AddProductButton';
-import { ProductSearch } from '@/components/adminComponents/products/ProductSearch';
-import { ProductList } from '@/components/adminComponents/products/ProductTable';
-import { Suspense } from 'react'
+import { AddProductButton } from "@/components/adminComponents/products/AddProductButton";
+import { ProductSearch } from "@/components/adminComponents/products/ProductSearch";
+import { ProductList } from "@/components/adminComponents/products/ProductTable";
+import { Suspense } from "react";
+import Loading from "../loading";
 
-export default function ProductPage({ 
-  searchParams 
-}: { 
-  searchParams: { page?: string; search?: string } 
+export default function ProductPage({
+  searchParams,
+}: {
+  searchParams: { page?: string; search?: string };
 }) {
-  const page = Number(searchParams.page) || 1
-  const search = searchParams.search || ''
+  const page = Number(searchParams.page) || 1;
+  const search = searchParams.search || "";
 
   return (
     <div className="container mx-auto p-6">
@@ -18,9 +19,9 @@ export default function ProductPage({
         <ProductSearch />
         <AddProductButton />
       </div>
-      <Suspense fallback={<div>Loading products...</div>}>
+      <Suspense fallback={<Loading />}>
         <ProductList page={page} search={search} />
       </Suspense>
     </div>
-  )
+  );
 }
