@@ -14,6 +14,9 @@ import { Button } from "@/components/ui/button";
 import { Brand, Category } from "@/lib/types/schemaTypes";
 import { Pagination } from "./Pagination";
 import ProductFormModal from "./AddProduct";
+import { Delete, Eye, SquarePen } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import ProductDetailsDialog from "./ProductdetailsModal";
 
 type FetchedProductData = {
   id: string;
@@ -47,6 +50,7 @@ export function ProductList({
   const [totalPages, setTotalPages] = useState<number>(1);
   const [editableProduct, setEditableProduct] = useState<FetchedProductData | null>(null)
   const [isEditing, setIsEditing] = useState(false);
+  const [viewingProduct, setViewingProduct] = useState<FetchedProductData | null>(null);
 
   useEffect(() => {
     async function loadProducts() {
@@ -64,18 +68,28 @@ export function ProductList({
     setEditableProduct(selectedProduct);
     setIsEditing(true);
   };
+  const handleView = (product: FetchedProductData) => {
+    const viewProduct=product || null;
+    setViewingProduct(viewProduct);
+  };
+  const handleCloseView = () => {
+    setViewingProduct(null);
+  };
+
 
   return (
     <div>
-     {isEditing && editableProduct && (
+      {isEditing && editableProduct && (
         <ProductFormModal
           product={editableProduct}
           onClose={() => setIsEditing(false)}
         />
       )}
+      <ProductDetailsDialog product={viewingProduct} isOpen={!!viewingProduct} onClose={handleCloseView} />
       <Table>
         <TableHeader>
-          <TableRow>
+          <TableRow className="uppercase font-thunder-lc text-xl ">
+            <TableHead>image</TableHead>
             <TableHead>ID</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Brand</TableHead>
@@ -88,8 +102,10 @@ export function ProductList({
         </TableHeader>
         <TableBody>
           {products?.map((product) => (
-            <TableRow key={product?.id}>
-              <TableCell>{product?.id}</TableCell>
+
+            <TableRow key={product?.id} className="font-semibold text-gray-800">
+              <TableCell><img src={product?.images[0]} className="h-14 w-14 rounded-full" /></TableCell>
+              <TableCell className="w-32 " ><span className="w-20 block truncate" >{product?.id}</span></TableCell>
               <TableCell>{product?.name}</TableCell>
               <TableCell>{product?.brand.name}</TableCell>
               <TableCell>
@@ -105,24 +121,34 @@ export function ProductList({
               </TableCell>
               <TableCell>
                 <span
-                  className={`px-2 py-1 rounded ${
-                    product?.status === "active"
-                      ? "bg-green-100 text-green-600"
-                      : "bg-red-100 text-red-600"
-                  }`}
+                  className={`px-2 py-1 font-Oswald capitalize rounded ${product?.status === "active"
+                    ? "bg-red-100 text-red-600"
+                    : "bg-green-100 text-green-600"
+                    }`}
                 >
                   {product?.status}
                 </span>
               </TableCell>
-              <TableCell>
+              <TableCell className="flex items-center justify-center">
+                <TooltipProvider >
+                  <Tooltip>
+                    <TooltipTrigger className="mr-2"><Eye onClick={() => handleView(product)} /></TooltipTrigger>
+                    <TooltipContent>
+                      <p>View the product</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
                 <Button
                   onClick={() => handleEditClick(product?.id)}
-                  variant="link"
-                  className="mr-2"
+
+                  className="mr-2 bg-amber-500"
                 >
+                  <SquarePen />
                   Edit
                 </Button>
-                <Button variant="link" className="text-red-600">
+                <Button variant="destructive" className="">
+                  <Delete />
                   Delete
                 </Button>
               </TableCell>
