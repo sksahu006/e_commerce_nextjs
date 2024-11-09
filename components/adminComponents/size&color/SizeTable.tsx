@@ -11,6 +11,7 @@ import AddEditDialog from './AddEditDialog'
 import { Pagination } from '@/components/Pagination'
 import { Pencil, Trash2 } from 'lucide-react'
 import { useDebounce } from '@/lib/hooks/useDebounce'
+import { useDeleteSize, useSizes } from '@/featues/colors/usegetsizes'
 
 export default function SizeTable({ initialSizes }: { initialSizes: SizeTableItem[] }) {
   const [page, setPage] = useState(1)
@@ -19,17 +20,22 @@ export default function SizeTable({ initialSizes }: { initialSizes: SizeTableIte
   const debouncedSearch = useDebounce(search, 300)
   const queryClient = useQueryClient()
 
-  const { data } = useQuery<{ sizes: SizeTableItem[], total: number }>({
-    queryKey: ['sizes', page, debouncedSearch],
-    queryFn: () => fetch(`/api/sizes?page=${page}&search=${debouncedSearch}`).then(res => res.json()),
-    initialData: { sizes: initialSizes, total: initialSizes.length },
-  })
-  console.log("data",data)
 
-  const deleteSizeMutation = useMutation({
-    mutationFn: deleteSize,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sizes'] }),
-  })
+  const { data } = useSizes(page, debouncedSearch, initialSizes)
+  const deleteSizeMutation = useDeleteSize()
+  
+
+  // const { data } = useQuery<{ sizes: SizeTableItem[], total: number }>({
+  //   queryKey: ['sizes', page, debouncedSearch],
+  //   queryFn: () => fetch(`/api/sizes?page=${page}&search=${debouncedSearch}`).then(res => res.json()),
+  //   initialData: { sizes: initialSizes, total: initialSizes.length },
+  // })
+  // console.log("data",data)
+
+  // const deleteSizeMutation = useMutation({
+  //   mutationFn: deleteSize,
+  //   onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sizes'] }),
+  // })
 
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this size?')) {
