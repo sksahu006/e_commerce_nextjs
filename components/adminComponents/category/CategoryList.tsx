@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -9,25 +9,26 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { deleteCategory } from '@/app/actions/adminActions/category'
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { deleteCategory } from "@/app/actions/adminActions/category";
 
 export default function CategoryList() {
-  const [page, setPage] = useState(1)
-  const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['categories', page, search],
+  const { data, isLoading, error, isFetching } = useQuery({
+    queryKey: ["categories", page, search],
     queryFn: () =>
-      fetch(`/api/category?page=${page}&search=${search}`).then(res =>
+      fetch(`/api/category?page=${page}&search=${search}`).then((res) =>
         res.json()
       ),
-  })
+    placeholderData: (previousData) => previousData,
+  });
 
-  if (isLoading) return <div>Loading...</div>
-  if (error) return <div>Error fetching categories</div>
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error fetching categories</div>;
 
   return (
     <div>
@@ -35,7 +36,7 @@ export default function CategoryList() {
         type="text"
         placeholder="Search categories..."
         value={search}
-        onChange={e => setSearch(e.target.value)}
+        onChange={(e) => setSearch(e.target.value)}
         className="mb-4"
       />
       <Table>
@@ -65,7 +66,7 @@ export default function CategoryList() {
       </Table>
       <div className="mt-4 flex justify-between">
         <Button
-          onClick={() => setPage(p => Math.max(1, p - 1))}
+          onClick={() => setPage((p) => Math.max(1, p - 1))}
           disabled={page === 1}
         >
           Previous
@@ -74,12 +75,12 @@ export default function CategoryList() {
           Page {page} of {data?.totalPages}
         </span>
         <Button
-          onClick={() => setPage(p => p + 1)}
+          onClick={() => setPage((p) => p + 1)}
           disabled={page === data?.totalPages}
         >
           Next
         </Button>
       </div>
     </div>
-  )
+  );
 }

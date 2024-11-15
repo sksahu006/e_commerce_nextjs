@@ -15,12 +15,12 @@ import { Input } from "@/components/ui/input";
 import { Pagination } from "@/components/Pagination";
 import { ProductVariantForm } from "./ProductVariantForm";
 import { ProductVariant } from "@/lib/types/schemaTypes";
-import { 
-  createProductVariant, 
-  deleteProductVariant, 
-  updateProductVariant 
+import {
+  createProductVariant,
+  deleteProductVariant,
+  updateProductVariant,
 } from "@/app/actions/adminActions/productVariants";
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2 } from "lucide-react";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 
 type ProductVariantWithRelations = ProductVariant;
@@ -33,16 +33,18 @@ interface ApiResponse {
 export function ProductVariantList() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [editingVariant, setEditingVariant] = useState<ProductVariantWithRelations | null>(null);
+  const [editingVariant, setEditingVariant] =
+    useState<ProductVariantWithRelations | null>(null);
   const queryClient = useQueryClient();
-  const debouncedSearch = useDebounce(search, 300)
+  const debouncedSearch = useDebounce(search, 300);
 
-  const { data, isLoading, error } = useQuery<ApiResponse>({
+  const { data, isLoading, error, isFetching } = useQuery<ApiResponse, Error>({
     queryKey: ["productVariants", page, debouncedSearch],
     queryFn: () =>
-      fetch(`/api/product-variants?page=${page}&search=${debouncedSearch}`).then((res) =>
-        res.json()
-      ),
+      fetch(
+        `/api/product-variants?page=${page}&search=${debouncedSearch}`
+      ).then((res) => res.json()),
+    placeholderData: (previousData) => previousData,
   });
 
   const deleteMutation = useMutation({
@@ -53,17 +55,27 @@ export function ProductVariantList() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<ProductVariant, 'id' | 'product' | 'size' | 'color' | 'orderItems' | 'cartItems'>) => 
-      createProductVariant(data),
+    mutationFn: (
+      data: Omit<
+        ProductVariant,
+        "id" | "product" | "size" | "color" | "orderItems" | "cartItems"
+      >
+    ) => createProductVariant(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["productVariants"] });
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { 
-      id: string; 
-      data: Omit<ProductVariant, 'id' | 'product' | 'size' | 'color' | 'orderItems' | 'cartItems'> 
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Omit<
+        ProductVariant,
+        "id" | "product" | "size" | "color" | "orderItems" | "cartItems"
+      >;
     }) => updateProductVariant(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["productVariants"] });
@@ -80,7 +92,12 @@ export function ProductVariantList() {
     setEditingVariant({} as ProductVariantWithRelations);
   };
 
-  const handleSave = async (data: Omit<ProductVariant, 'id' | 'product' | 'size' | 'color' | 'orderItems' | 'cartItems'>) => {
+  const handleSave = async (
+    data: Omit<
+      ProductVariant,
+      "id" | "product" | "size" | "color" | "orderItems" | "cartItems"
+    >
+  ) => {
     if (editingVariant?.id) {
       await updateMutation.mutateAsync({ id: editingVariant.id, data });
     } else {
@@ -89,7 +106,9 @@ export function ProductVariantList() {
     setEditingVariant(null);
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) {
+    return <div>Loading...{isFetching && <div>Loading new data...</div>}</div>;
+  }
   if (error) return <div>An error occurred: {error.toString()}</div>;
 
   return (
@@ -101,9 +120,7 @@ export function ProductVariantList() {
           onChange={(e) => setSearch(e.target.value)}
           className="max-w-sm"
         />
-        <Button onClick={handleAdd}>
-          Add New Variant
-        </Button>
+        <Button onClick={handleAdd}>Add New Variant</Button>
       </div>
       <Table>
         <TableHeader>
@@ -117,7 +134,7 @@ export function ProductVariantList() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data?.variants.map((variant) => (
+          {data?.variants?.map((variant) => (
             <TableRow key={variant.id}>
               <TableCell>{variant.product.name}</TableCell>
               <TableCell>{variant.size.name}</TableCell>
