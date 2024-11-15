@@ -127,7 +127,6 @@ export function ProductFormModal({
       if (product) {
         await updateProduct(product.id, data);
       } else {
-        console.log("adding is called");
         await addProduct(data);
       }
       queryClient.invalidateQueries({ queryKey: ["products"] });
@@ -192,7 +191,7 @@ export function ProductFormModal({
                   <FormControl>
                     <div>
                       <ImageUpload onImageUpload={handleImageUpload} />
-                      {field.value.map((url, index) => (
+                      {field?.value?.map((url, index) => (
                         <div key={index} className="mt-2 flex items-center">
                           <Image
                             src={url}
