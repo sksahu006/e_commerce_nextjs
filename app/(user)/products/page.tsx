@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Heart, ShoppingCart } from "lucide-react"
+import { useParams, useSearchParams } from "next/navigation";
 
 // Define Product type
 type Product = {
@@ -37,6 +38,12 @@ export default function ProductSection() {
     const [selectedSizes, setSelectedSizes] = useState<string[]>([]) // Use string array
     const [selectedColors, setSelectedColors] = useState<string[]>([]) // Use string array
     const [sortBy, setSortBy] = useState<string>("popularity") // Use string
+
+    const searchParamss = useSearchParams()
+    
+    console.log(searchParamss.get('category'))
+    
+    console.log(searchParamss.get('search'))
 
     const handleSizeChange = (size: string) => {
         setSelectedSizes((prev) =>
