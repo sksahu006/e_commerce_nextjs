@@ -64,7 +64,7 @@ export async function updateProduct(id: string, data: ProductFormData) {
 }
 
 export async function getProduct(id: string) {
-  return prisma.product.findUnique({
+  const product =await  prisma.product.findUnique({
     where: { id },
     include: {
       categories: { include: { category: true } },
@@ -72,6 +72,8 @@ export async function getProduct(id: string) {
       variants: { include: { size: true, color: true } },
     },
   })
+  
+  return product
 }
 
 export async function fetchProducts(page = 1, limit = 10, search = '') {

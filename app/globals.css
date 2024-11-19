@@ -112,4 +112,8 @@
     font-family: 'Thunder LC', sans-serif;
   }
 }
+@keyframes fade-in-out {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
 
