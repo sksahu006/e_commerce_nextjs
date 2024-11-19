@@ -1,120 +1,148 @@
-"use client"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
+"use client";
+import { Button } from "@/components/ui/button";
+import { useHomePageData } from "@/featues/homePageProducts/useHomePage";
+import { useState } from "react";
+import CardSkeliton from "./skelitons/Productcardskeliton";
+import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
+import { Decimal } from "@prisma/client/runtime/library";
+import Link from "next/link";
 
-interface Product {
-  id: number
-  name: string
-  price: number
-  originalPrice?: number
-  description: string
-  image1: string
-  image2: string
-  category: string
-}
-
-const products: Product[] = [
-  {
-    id: 1,
-    name: "Urban Streetwear Hoodie",
-    price: 2999,
-    originalPrice: 3499,
-    description: "Comfortable and stylish hoodie for the urban explorer",
-    image1: "/ph1.jpg",
-    image2: "/ph2.jpg",
-    category: "Best Seller"
-  },
-  {
-    id: 2,
-    name: "Eco-Friendly Yoga Pants",
-    price: 1799,
-    description: "Sustainable and flexible yoga pants for your daily practice",
-    image1: "/ph5.jpg",
-    image2: "/ph3.jpg",
-    category: "New Arrival"
-  },
-  {
-    id: 3,
-    name: "Vintage Graphic T-Shirt",
-    price: 999,
-    originalPrice: 1299,
-    description: "Retro-inspired graphic tee for a classic look",
-    image1: "/ph2.jpg",
-    image2: "/ph3.jpg",
-    category: "Limited Edition"
-  },
-  {
-    id: 4,
-    name: "All-Weather Jacket",
-    price: 4499,
-    description: "Versatile jacket suitable for all seasons",
-    image1: "/ph4.jpg",
-    image2: "/ph5.jpg",
-    category: "Top Rated"
-  }
-]
+// Define the Product type
+type Product = {
+  id: string;
+  name: string;
+  slug: string;
+  images: string[];
+  description?: string | null;
+  basePrice: Decimal; // Change from number to Decimal
+  discountPrice?: Decimal | null; // Change from number to Decimal
+  featured: boolean;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  brand: {
+    id: string;
+    name: string;
+  };
+  categories: Array<{
+    category: {
+      id: string;
+      name: string;
+      description: string | null;
+    };
+  }>;
+  variants: Array<{
+    size: {
+      id: string;
+      name: string;
+    };
+    color: {
+      id: string;
+      name: string;
+      hexCode: string;
+    };
+  }>;
+};
 
 export default function FeaturedProducts() {
+  const { data, isLoading, isFetching, isPending, isError } = useHomePageData();
+
+  if (isLoading || isFetching || isPending) {
+    return (
+      <div>
+        <CardSkeliton />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return <div className="text-center py-12">Error fetching products.</div>;
+  }
+
   return (
-    <section className="py-12 bg-gray-50">
-      <div className="container mx-auto px-4">
-        <h2 className="text-[50px] font-bold text-center mb-8 underline uppercase font-thunder-lc "> Featured Products</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+    <section className="py-12 px-4 md:px-6 lg:px-8 bg-gray-50">
+      <h2 className="text-[50px] font-bold text-center mb-8 underline uppercase font-thunder-lc">
+        Featured Products
+      </h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        {data?.featuredProducts.map((product: Product) => (
+          <ProductCard key={product?.id} product={product} />
+        ))}
       </div>
     </section>
-  )
+  );
 }
 
 function ProductCard({ product }: { product: Product }) {
-  const [isHovered, setIsHovered] = useState(false)
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div
-      className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <div className="relative pb-[75%] overflow-hidden">
-        <img
-          src={product.image1}
-          alt={`${product.name} - Front View`}
-          className={`absolute top-0 left-0 w-full h-full object-cover transition-all duration-300 ${
-            isHovered ? "scale-105 opacity-0" : "scale-100 opacity-100"
-          }`}
-        />
-        <img
-          src={product.image2}
-          alt={`${product.name} - Alternate View`}
-          className={`absolute top-0 left-0 w-full h-full object-cover transition-all duration-300 ${
-            isHovered ? "scale-105 opacity-100" : "scale-100 opacity-0"
-          }`}
-        />
-      </div>
-      <div className="p-4">
-        <h3 className="font-bold text-lg">Kraken</h3>
-        <h4 className="text-md mt-1">{product.name}</h4>
-        <div className="mt-2">
-          {product.originalPrice && (
-            <span className="text-gray-500 line-through mr-2">
-              ₹{product.originalPrice.toLocaleString('en-IN')}
-            </span>
-          )}
-          <span className="text-xl font-semibold text-primary">
-            ₹{product.price.toLocaleString('en-IN')}
-          </span>
+    <Link href={`/products/${product.id}`}>
+      <div
+        className="bg-white rounded-sm overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <div className="relative pt-[100%]">
+          <Image
+            src={product?.images[0]}
+            alt={product?.name}
+            layout="fill"
+            objectFit="cover"
+            className={`absolute top-0 left-0 w-full h-full object-cover transition-transform duration-300 ${
+              isHovered ? "scale-105" : "scale-100"
+            }`}
+          />
+          <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
+            {product?.categories[0]?.category.name}
+          </Badge>
         </div>
-        <p className="text-sm text-gray-600 mt-2 line-clamp-2 ">{product.description}</p>
-        <Button className="w-full mt-4">Add to Cart</Button>
+        <div className="p-2 flex flex-col">
+          <h1 className="font-bold text-lg">{product?.brand.name}</h1>
+          <h4 className="text-md mb-2 font-TwentiethCenturyforKenmoreLight">
+            {product?.name}
+          </h4>
+          <div className="flex items-center justify-between">
+            <div>
+              {product.discountPrice ? (
+                <>
+                  <span className="line-through font-bold text-xs font-TwentiethCenturyforKenmoreLight mr-2">
+                    ₹{Number(product.basePrice).toLocaleString("en-IN")}
+                  </span>
+                  <span className="font-bold text-xs font-TwentiethCenturyforKenmoreLight">
+                    ₹{Number(product.discountPrice).toLocaleString("en-IN")}
+                  </span>
+                  <span className="ml-2 text-xs text-green-600">
+                    {(
+                      ((Number(product.basePrice) -
+                        Number(product.discountPrice)) /
+                        Number(product.basePrice)) *
+                      100
+                    ).toFixed(2)}
+                    % OFF
+                  </span>
+                </>
+              ) : (
+                <span className="text-lg font-bold font-TwentiethCenturyforKenmoreLight">
+                  ₹{Number(product.basePrice).toLocaleString("en-IN")}
+                </span>
+              )}
+            </div>
+            <div className="flex gap-2">
+              {product?.variants.map((variant) => (
+                <span
+                  key={variant.size.id}
+                  className="text-sm border border-gray-300 rounded-md px-2 py-1"
+                >
+                  {variant.size.name}
+                </span>
+              ))}
+            </div>
+          </div>
+          {/* <Button className="mt-4">Add to Cart</Button> */}
+        </div>
       </div>
-      <div className="absolute bottom-2 left-2">
-        {/* <span className="inline-block bg-primary text-primary-foreground text-xs px-2 py-1 rounded">
-          {product.category}
-        </span> */}
-      </div>
-    </div>
-  )
+    </Link>
+  );
 }
