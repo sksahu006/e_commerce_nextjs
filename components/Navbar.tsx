@@ -39,15 +39,22 @@ export default function Navbar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
-      <div className="h-2 bg-red-700" />
+      <div className="h-2 bg-black" />
       <nav className="bg-white border-b border-gray-200 py-4 shadow-lg">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-2">
-              <Image src={logo} alt="Kraken Logo" width={40} height={40} priority />
-              <span className="text-xl font-bold sr-only">Kraken</span>
-            </Link>
-            <div className="flex items-center space-x-4">
+            <div className="w-full flex items-center pl-[14rem] justify-center">
+              <div className="">
+                <Link href="/" className="flex items-center space-x-2">
+                  <Image src={logo} alt="Kraken Logo" width={50} height={50} priority />
+                  <span className="text-xl font-bold sr-only ">Kraken</span>
+                </Link>
+              </div>
+              <span className="uppercase font-thunder-lc pl-3  tracking-wider text-[40px]">Kraken</span>
+
+            </div>
+
+            <div className="flex items-center  space-x-4">
               <SearchBar />
               <Button
                 variant="ghost"
@@ -60,7 +67,7 @@ export default function Navbar() {
                 <Menu className="h-6 w-6" />
                 <span className="sr-only">Toggle menu</span>
               </Button>
-              <div className="hidden md:flex items-center space-x-4">
+              <div className="hidden md:flex items-center ">
                 <ClientNavbar />
               </div>
             </div>
@@ -74,9 +81,8 @@ export default function Navbar() {
               <Link
                 key={href}
                 href={href}
-                className={`block py-2 text-gray-900 ${
-                  pathname === href ? "font-bold" : ""
-                }`}
+                className={`block py-2 text-gray-900 ${pathname === href ? "font-bold" : ""
+                  }`}
               >
                 {label}
               </Link>

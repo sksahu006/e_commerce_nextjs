@@ -31,7 +31,7 @@ export default function UserLoginState() {
   if (!session) {
     return (
       <Link href="/signin">
-        <Button variant="ghost">Sign In</Button>
+        <Button >Sign In</Button>
       </Link>
     );
   }
@@ -39,7 +39,7 @@ export default function UserLoginState() {
   return (
     <div className="flex items-center space-x-2">
       <Button variant="ghost" size="icon">
-        <User className="h-5 w-5" />
+        <User className="h-7 w-7" />
       </Button>
       <Button
         variant="ghost"

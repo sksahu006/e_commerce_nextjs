@@ -5,7 +5,7 @@ import { Heart } from 'lucide-react';
 export default function Wishlist() {
   return (
     <Button variant="ghost" size="icon">
-      <Heart className="h-5 w-5" />
+      <Heart className="h-10 w-8" />
     </Button>
   );
 }
