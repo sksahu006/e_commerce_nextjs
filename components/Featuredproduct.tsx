@@ -90,28 +90,30 @@ function ProductCard({ product }: { product: Product }) {
             alt={product?.name}
             layout="fill"
             objectFit="cover"
-            className={`absolute top-0 left-0 w-full h-full object-cover transition-transform duration-300 ${
-              isHovered ? "scale-105" : "scale-100"
-            }`}
+            className={`absolute top-0 left-0 w-full h-full object-cover transition-transform duration-300 ${isHovered ? "scale-105" : "scale-100"
+              }`}
           />
           <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
             {product?.categories[0]?.category.name}
           </Badge>
+          <span className="absolute uppercase tracking-widest text-white bottom-1 font-Raleway left-1 text-[8px] bg-gray-50/10 text-primary-foreground p-2">
+            premium knit fabric
+          </span>
         </div>
         <div className="p-2 flex flex-col">
-          <h1 className="font-bold text-lg">{product?.brand.name}</h1>
-          <h4 className="text-md mb-2 font-TwentiethCenturyforKenmoreLight">
-            {product?.name}
+          <h1 className="font-semibold text-base text-gray-600 border-b-[1px] border-gray-300">Kraken®</h1>
+          <h4 className="text-md  font-TwentiethCenturyforKenmoreLight text-gray-700">
+            {product.name}
           </h4>
           <div className="flex items-center justify-between">
-            <div>
+            <div className="font-thunder-lc">
               {product.discountPrice ? (
                 <>
-                  <span className="line-through font-bold text-xs font-TwentiethCenturyforKenmoreLight mr-2">
-                    ₹{Number(product.basePrice).toLocaleString("en-IN")}
+                  <span className="font-bold text-sm text-gray-600 mr-2">
+                    ₹ {Number(product.discountPrice).toFixed(2)}
                   </span>
-                  <span className="font-bold text-xs font-TwentiethCenturyforKenmoreLight">
-                    ₹{Number(product.discountPrice).toLocaleString("en-IN")}
+                  <span className="line-through text-gray-300 font-bold text-sm  mr-2">
+                    ₹ {Number(product.basePrice).toFixed(2)}
                   </span>
                   <span className="ml-2 text-xs text-green-600">
                     {(
