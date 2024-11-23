@@ -34,3 +34,12 @@ export async function deleteCategory(id: string) {
   await prisma.category.delete({ where: { id } })
   revalidatePath('/admin/categories')
 }
+export async function getAllCategory() {
+
+  try {
+    const categories = await prisma.category.findMany()
+    return { success: true, categories };
+  } catch (error) {
+    return { error: "Failed to fetch categories" };
+  }
+}
