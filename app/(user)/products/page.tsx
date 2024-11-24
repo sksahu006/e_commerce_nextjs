@@ -11,8 +11,9 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
-import { Heart, ShoppingCart } from "lucide-react"
+import { Heart, HeartIcon, ShoppingCart } from "lucide-react"
 import { useParams, useSearchParams } from "next/navigation";
+import ProductSidebar from "@/components/ProductSidebar"
 
 // Define Product type
 type Product = {
@@ -34,90 +35,23 @@ const products: Product[] = [
 ]
 
 export default function ProductSection() {
-    const [priceRange, setPriceRange] = useState<[number, number]>([0, 200])
-    const [selectedSizes, setSelectedSizes] = useState<string[]>([]) // Use string array
-    const [selectedColors, setSelectedColors] = useState<string[]>([]) // Use string array
+   
     const [sortBy, setSortBy] = useState<string>("popularity") // Use string
 
     const searchParamss = useSearchParams()
-    
+
     console.log(searchParamss.get('category'))
-    
+
     console.log(searchParamss.get('search'))
 
-    const handleSizeChange = (size: string) => {
-        setSelectedSizes((prev) =>
-            prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
-        )
-    }
-
-    const handleColorChange = (color: string) => {
-        setSelectedColors((prev) =>
-            prev.includes(color) ? prev.filter((c) => c !== color) : [...prev, color]
-        )
-    }
+   
 
     return (
         <div className="container mx-auto px-4 py-8 mt-14">
             <div className="flex flex-col md:flex-row gap-8">
-                {/* Filter Sidebar */}
-                <aside className="w-full md:w-1/4 space-y-6">
-                    <div>
-                        <h3 className="text-lg font-semibold mb-2">Size</h3>
-                        <div className="space-y-2">
-                            {["S", "M", "L", "XL"].map((size) => (
-                                <div key={size} className="flex items-center">
-                                    <Checkbox
-                                        id={`size-${size}`}
-                                        checked={selectedSizes.includes(size)}
-                                        onCheckedChange={() => handleSizeChange(size)}
-                                    />
-                                    <label
-                                        htmlFor={`size-${size}`}
-                                        className="ml-2 text-sm font-medium leading-none"
-                                    >
-                                        {size}
-                                    </label>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                    <div>
-                        <h3 className="text-lg font-semibold mb-2">Color</h3>
-                        <div className="flex flex-wrap gap-2">
-                            {["red", "blue", "green", "yellow", "black", "white"].map(
-                                (color) => (
-                                    <button
-                                        key={color}
-                                        className={`w-6 h-6 rounded-full border ${selectedColors.includes(color)
-                                            ? "ring-2 ring-offset-2 ring-gray-400"
-                                            : ""
-                                            }`}
-                                        style={{ backgroundColor: color }}
-                                        onClick={() => handleColorChange(color)}
-                                        aria-label={`Select ${color} color`}
-                                    />
-                                )
-                            )}
-                        </div>
-                    </div>
-                    <div>
-                        <h3 className="text-lg font-semibold mb-2">Price Range</h3>
-                        <Slider
-                            min={0}
-                            max={200}
-                            step={1}
-                            value={priceRange as [number, number]} // Ensure value is correctly typed
-                            onValueChange={(newValue: [number, number]) => setPriceRange(newValue)} // Ensure handler accepts the correct type
-                            className="w-full"
-                        />
+               
+               <ProductSidebar/>
 
-                        <div className="flex justify-between mt-2">
-                            <span>${priceRange[0]}</span>
-                            <span>${priceRange[1]}</span>
-                        </div>
-                    </div>
-                </aside>
 
                 {/* Product Grid */}
                 <main className="w-full md:w-3/4">
@@ -137,23 +71,37 @@ export default function ProductSection() {
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         {products.map((product) => (
-                            <div key={product.id} className="border  rounded-lg overflow-hidden shadow-sm">
-                                <img
-                                    src={product.image}
-                                    alt={product.name}
-                                    className="w-full h-80 object-cover"
-                                />
-
-                                <div className="p-2 font-TwentiethCenturyforKenmoreLight">
-                                    <div className="flex w-full justify-between">
-                                        <h3 className="font-bold text-gray-900 text-lg">{product.name}</h3>
-                                        <Heart className="" />
+                            <div key={product.id} className="border   h-[400px]  rounded-lg overflow-hidden shadow-sm">
+                                <div className="relative group">
+                                    <div className="relative overflow-hidden h-[300px] pt-[100%]">
+                                        <img
+                                            src={product.image}
+                                            alt={product.name}
+                                            className="absolute h-[100%] w-full inset-0 transition-opacity duration-300 rounded-md "
+                                        />
+                                        <span className="absolute  font-bold uppercase text-center tracking-widest w-full text-white bottom-0 font-TwentiethCenturyforKenmoreLight left-0 text-[12px] bg-gray-900/70 text-primary-foreground p-2">
+                                            premium knit fabric
+                                        </span>
+                                        <span className="absolute  font-bold uppercase text-center tracking-widest  text-white top-3 font-TwentiethCenturyforKenmoreLight right-3 text-[12px] bg-gray-50/10 text-primary-foreground rounded-full flex items-center justify-center p-1">
+                                            <HeartIcon className="text-white h-4 w-4 " />
+                                        </span>
                                     </div>
 
-                                    <span className="text-xs font-Raleway text-gray-600">product description</span>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-lg font-bold">${product.price.toFixed(2)}</span>
-                                     
+                                </div>
+
+
+                                <div className="p-2 ">
+                                    <div className="flex w-full ">
+                                        <h3 className="font-extrabold font-thunder-lc  text-gray-800 text-lg">{product.name}</h3>
+
+                                    </div>
+
+                                    <span className="text-xs font-ShackletonTest font-thin text-gray-500 tracking-wide  line-clamp-1">product description dsjhdjsdf fjshjsdf sfjhsfj sjdfhjsdf sjkdfhsjfh sjhsjf qqqqqqqqqqqqq qqqqqqqqqqqq qqqqqqqq </span>
+                                    <div className="flex  font-ShackletonTest items-center">
+                                        <span className="text-sm font-bold">Rs.{product.price.toFixed(2)}</span>
+                                        <span className="text-xs ml-2 text-gray-400 line-through ">Rs.{product.price.toFixed(2)}</span>
+                                        <span className="text-green-600 text-[10px] ml-2">23% OFF</span>
+
                                     </div>
                                 </div>
                             </div>

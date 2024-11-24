@@ -14,7 +14,6 @@ export default function NewArrivals() {
             </div>
         );
     }
-
     return (
         <section className="py-14 px-4 md:px-6 lg:px-8">
             <h2 className="font-bold mb-8 text-center uppercase font-thunder-lc text-[55px] underline">
@@ -34,47 +33,51 @@ export default function NewArrivals() {
                                     alt={product.name}
                                     layout="fill"
                                     objectFit="cover"
-                                    className="absolute inset-0 transition-opacity duration-300 group-hover:opacity-0"
+                                    className="absolute inset-0 transition-opacity duration-300 rounded-md group-hover:opacity-0"
                                 />
                                 <Image
                                     src={product.images[1]} // Second image
                                     alt={product.name}
                                     layout="fill"
                                     objectFit="cover"
-                                    className="absolute inset-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+                                    className="absolute rounded-md inset-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100"
                                 />
                             </div>
-                            <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
+                            <Badge className="absolute top-2 right-2 text-xs bg-gray-900/80 text-primary-foreground">
                                 {product.categories[0]?.category.name}
                             </Badge>
+                            <span className="absolute uppercase tracking-widest text-white bottom-1 font-Raleway left-1 text-[8px] bg-gray-900/50 text-primary-foreground p-2">
+                                premium knit fabric
+                            </span>
                         </div>
                         <div className="p-2 flex flex-col">
-                            <h1 className="font-bold text-lg">{product.brand.name}</h1>
-                            <h4 className="text-md mb-2 font-TwentiethCenturyforKenmoreLight">
+                            <h1 className="font-semibold text-base text-gray-600 border-b-[1px] border-gray-300">Kraken®</h1>
+                            <h4 className="text-md  font-TwentiethCenturyforKenmoreLight text-gray-700">
                                 {product.name}
                             </h4>
                             <div className="flex items-center justify-between">
-                                <div>
+                                <div className="font-thunder-lc">
                                     {product.discountPrice ? (
                                         <>
-                                            <span className="line-through font-bold text-xs font-TwentiethCenturyforKenmoreLight mr-2">
-                                                INR {Number(product.basePrice).toFixed(2)}
+                                            <span className="font-bold text-sm text-gray-600 mr-2">
+                                                ₹ {Number(product.discountPrice).toFixed(2)}
                                             </span>
-                                            <span className="font-bold text-xs font-TwentiethCenturyforKenmoreLight">
-                                                INR {Number(product.discountPrice).toFixed(2)}
+                                            <span className="line-through text-gray-400 font-bold text-sm  mr-2">
+                                                ₹ {Number(product.basePrice).toFixed(2)}
                                             </span>
-                                            <span className="ml-2 text-xs text-green-600">
+
+                                            {/* <span className="ml-2 text-sm text-green-600">
                                                 {(
                                                     ((Number(product.basePrice) - Number(product.discountPrice)) /
                                                         Number(product.basePrice)) *
                                                     100
-                                                ).toFixed(2)}
+                                                ).toFixed(0)}
                                                 % OFF
-                                            </span>
+                                            </span> */}
                                         </>
                                     ) : (
-                                        <span className="text-lg font-bold font-TwentiethCenturyforKenmoreLight">
-                                            INR {product.basePrice.toFixed(2)}
+                                        <span className="text-lg font-bold ">
+                                            ₹ {product.basePrice.toFixed(2)}
                                         </span>
                                     )}
                                 </div>
@@ -88,7 +91,10 @@ export default function NewArrivals() {
                                         </span>
                                     ))}
                                 </div>
+
+
                             </div>
+
                         </div>
                     </div>
                 ))}

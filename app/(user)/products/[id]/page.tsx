@@ -38,9 +38,11 @@ export default function ProductPage() {
   
 
 
-  if (product && !selectedSize) {
-    setSelectedSize(product?.variants[0].id);
+  if (product && !selectedSize  && product?.variants[0]?.id) {
+    setSelectedSize(product?.variants[0]?.id);
+    
   }
+
   // if (product && !selectedColor) {
   //   setSelectedColor(product.colors[0]);
   // }
@@ -149,14 +151,14 @@ export default function ProductPage() {
                     onClick={() => setSelectedSize(variant?.id)}
                   >
                     
-                    {variant.size.name}
+                    {variant?.size?.name}
                   </Button>
                 ))}
               </div>
             </div>
             <div className="flex gap-2">
               <div   style={{ backgroundColor: product?.variants[0]?.color?.hexCode || "blue" }} className={`rounded-full  h-5 w-5   `}/>
-              {product?.variants[0].color.name}
+              {product?.variants[0]?.color?.name}
             </div>
 
 
