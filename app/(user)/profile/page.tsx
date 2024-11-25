@@ -23,12 +23,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function UserProfile() {
   const [isAddressesOpen, setIsAddressesOpen] = useState(false)
-  const [currentTime, setCurrentTime] = useState(new Date())
+  const [currentTime, setCurrentTime] = useState<Date | null>(null)
 
   useEffect(() => {
+    setCurrentTime(new Date())
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
     return () => clearInterval(timer)
   }, [])
+
 
   return (
     <div className="flex min-h-screen bg-background mt-24">
@@ -43,7 +45,7 @@ export default function UserProfile() {
         />
         <h1 className="text-2xl font-bold mb-2">John Doe</h1>
         <p className="text-muted-foreground mb-4">
-          {currentTime.toLocaleTimeString()}
+        {currentTime ? currentTime.toLocaleTimeString() : "Loading..."}
         </p>
         <Button variant="outline" className="w-full mb-2">
           <User className="mr-2 h-4 w-4" /> Edit Profile

@@ -2,24 +2,52 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Star, Heart, ShoppingCart } from "lucide-react";
-
+import { Heart, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
 import { useParams } from "next/navigation";
 import { useSingleProduct } from "@/featues/singlrProduct/useSingleProduct";
-import CardSkeliton from "@/components/skelitons/Productcardskeliton";
 import SingleProduct from "@/components/skelitons/SingleProduct";
+import { useCart } from "@/featues/carts/useCart";
+import { useSession } from "next-auth/react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ProductPage() {
   const [selectedSize, setSelectedSize] = useState<string>("");
-  const [selectedColor, setSelectedColor] = useState<string>("");
   const [selectedImage, setSelectedImage] = useState<number>(0);
   const { id } = useParams();
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
+  const { addToCartMutation } = useCart(userId as string);
+  const { toast } = useToast();
 
-  let { data, isLoading, isError, isFetching, isPending, error } = useSingleProduct(id as string);
+  const handleAddToCart = async () => {
+    if (!selectedSize) return;
 
+    try {
+      if (userId) {
+        await addToCartMutation.mutateAsync({
+          userId,
+          variantId: selectedSize,
+          quantity: 1,
+        });
+      }
+
+      toast({
+        title: "Success",
+        description: "Item added to cart",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  let { data, isLoading, isError, isFetching, isPending, error } =
+    useSingleProduct(id as string);
 
   if (isLoading || isFetching || isPending) {
     return (
@@ -33,14 +61,10 @@ export default function ProductPage() {
     return <div>Error: {error?.message}</div>;
   }
 
-
   let product = data;
-  
 
-
-  if (product && !selectedSize  && product?.variants[0]?.id) {
+  if (product && !selectedSize && product?.variants[0]?.id) {
     setSelectedSize(product?.variants[0]?.id);
-    
   }
 
   // if (product && !selectedColor) {
@@ -49,27 +73,27 @@ export default function ProductPage() {
 
   const discountPercentage = Number(product?.discountPrice)
     ? Math.round(
-      ((Number(product?.basePrice) - Number(product?.discountPrice)) / Number(product?.basePrice)) *
-      100
-    )
+        ((Number(product?.basePrice) - Number(product?.discountPrice)) /
+          Number(product?.basePrice)) *
+          100
+      )
     : 0;
 
   return (
     <div className="min-h-screen mt-20">
       <div className="container mx-auto px-4 py-8">
         <div className="grid md:grid-cols-2 gap-8">
-
           {/* Product Images */}
           <div className="relative">
             <div className="relative h-[90vh] mb-4">
               <Image
-                src={product?.images[selectedImage] || '/ph1.png'}
-                alt={product?.name || 'image'}
+                src={product?.images[selectedImage] || "/ph1.png"}
+                alt={product?.name || "image"}
                 layout="fill"
                 objectFit="cover"
                 className="rounded-lg"
               />
-              {(product?.featured) && (
+              {product?.featured && (
                 <Badge className="absolute top-4 right-4 text-sm font-semibold">
                   {product?.featured ? "Featured" : "On Sale"}
                 </Badge>
@@ -77,10 +101,12 @@ export default function ProductPage() {
             </div>
 
             <div className="flex space-x-2 overflow-x-auto">
-              {product?.images.map((image, index) => (
+              {product?.images?.map((image: string, index: number) => (
                 <button
                   key={index}
-                  className={`flex-shrink-0 w-20 h-20 rounded-md overflow-hidden ${selectedImage === index ? "ring-2 ring-primary" : ""}`}
+                  className={`flex-shrink-0 w-20 h-20 rounded-md overflow-hidden ${
+                    selectedImage === index ? "ring-2 ring-primary" : ""
+                  }`}
                   onClick={() => setSelectedImage(index)}
                 >
                   <Image
@@ -98,11 +124,13 @@ export default function ProductPage() {
           {/* Product Details */}
           <div className="space-y-6">
             <div>
-              <h1 className="text-3xl font-bold font-thunder-lc">{product?.name}</h1>
+              <h1 className="text-3xl font-bold font-thunder-lc">
+                {product?.name}
+              </h1>
               <div className="flex items-center space-x-2 mt-2">
                 <Image
-                  src={'/kraken-logo.png'}
-                  alt='kraken logo'
+                  src={"/kraken-logo.png"}
+                  alt="kraken logo"
                   width={24}
                   height={24}
                 />
@@ -132,35 +160,49 @@ export default function ProductPage() {
             <div className="flex items-baseline space-x-2">
               {product?.discountPrice ? (
                 <>
-                  <span className="text-2xl font-bold">${Number(product?.discountPrice).toFixed(2)}</span>
-                  <span className="text-lg text-gray-500 line-through">${Number(product?.basePrice).toFixed(2)}</span>
-                  <span className="text-green-500">Save {discountPercentage}%</span>
+                  <span className="text-2xl font-bold">
+                    ${Number(product?.discountPrice).toFixed(2)}
+                  </span>
+                  <span className="text-lg text-gray-500 line-through">
+                    ${Number(product?.basePrice).toFixed(2)}
+                  </span>
+                  <span className="text-green-500">
+                    Save {discountPercentage}%
+                  </span>
                 </>
               ) : (
-                <span className="text-2xl font-bold">${Number(product?.basePrice).toFixed(2)}</span>
+                <span className="text-2xl font-bold">
+                  ${Number(product?.basePrice).toFixed(2)}
+                </span>
               )}
             </div>
 
             <div>
               <h2 className="text-lg font-semibold mb-2">Sizes Available</h2>
               <div className="flex space-x-2">
-                {product?.variants.map((variant) => (
+                {product?.variants.map((variant: any) => (
                   <Button
                     key={variant?.id}
-                    variant={selectedSize === variant?.id ? "default" : "outline"}
+                    variant={
+                      selectedSize === variant?.id ? "default" : "outline"
+                    }
                     onClick={() => setSelectedSize(variant?.id)}
                   >
-                    
                     {variant?.size?.name}
                   </Button>
                 ))}
               </div>
             </div>
             <div className="flex gap-2">
-              <div   style={{ backgroundColor: product?.variants[0]?.color?.hexCode || "blue" }} className={`rounded-full  h-5 w-5   `}/>
+              <div
+                style={{
+                  backgroundColor:
+                    product?.variants[0]?.color?.hexCode || "blue",
+                }}
+                className={`rounded-full  h-5 w-5   `}
+              />
               {product?.variants[0]?.color?.name}
             </div>
-
 
             {/* need to be done later for color we will show the variants */}
             <div>
@@ -178,9 +220,13 @@ export default function ProductPage() {
             </div>
 
             <div className="flex space-x-4">
-              <Button className="w-1/2">
+              <Button
+                onClick={handleAddToCart}
+                disabled={addToCartMutation.isPending}
+                className="w-1/2"
+              >
                 <ShoppingCart className="w-4 h-4 mr-2" />
-                Add to Cart
+                {addToCartMutation.isPending ? "Adding..." : "Add to Cart"}
               </Button>
               <Button variant="outline" className="w-1/2">
                 <Heart className="w-4 h-4" />
@@ -188,13 +234,19 @@ export default function ProductPage() {
               </Button>
             </div>
             <div>
-              <h2 className="text-2xl font-semibold mb-2 font-thunder-lc">Product Details</h2>
-              <p className="text-gray-600 font-TwentiethCenturyforKenmoreLight">{product?.description}</p>
+              <h2 className="text-2xl font-semibold mb-2 font-thunder-lc">
+                Product Details
+              </h2>
+              <p className="text-gray-600 font-TwentiethCenturyforKenmoreLight">
+                {product?.description}
+              </p>
               <p className="mt-2 font-TwentiethCenturyforKenmoreLight">
-                <strong className="font-thunder-lc text-2xl ">Material:</strong> Cotton
+                <strong className="font-thunder-lc text-2xl ">Material:</strong>{" "}
+                Cotton
               </p>
               <p className="font-TwentiethCenturyforKenmoreLight">
-                <strong className="font-thunder-lc text-2xl ">Care:</strong>Dry clean only
+                <strong className="font-thunder-lc text-2xl ">Care:</strong>Dry
+                clean only
               </p>
             </div>
 

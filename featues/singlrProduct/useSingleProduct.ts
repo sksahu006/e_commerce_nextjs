@@ -1,5 +1,5 @@
 import { getProduct } from "@/app/actions/adminActions/product";
-import { Product } from "@prisma/client";
+// import { Product } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 
 // Custom hook to fetch a single product

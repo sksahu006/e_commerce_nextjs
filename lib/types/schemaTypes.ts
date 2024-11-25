@@ -211,3 +211,15 @@ export type WishlistItem = {
   productId: string;
   addedAt: Date;
 };
+
+export interface AddToCartParams {
+  userId: string;
+  variantId: string;
+  quantity: number;
+}
+
+export interface AddToCartResponse {
+  success: boolean;
+  message: string;
+  count?: number;
+}
