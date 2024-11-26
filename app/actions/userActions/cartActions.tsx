@@ -83,3 +83,28 @@ export async function getCartCount(userId: string) {
 
   return count;
 }
+
+export async function getCartItems(userId: string) {
+  if (!userId) throw new Error("User ID is required");
+
+  try {
+    const cart = await prisma.cart.findUnique({
+      where: { userId },
+      select: {
+        cartItems: {
+          select:{
+            
+          }
+        }
+      }
+
+    })
+
+  } catch (error) {
+    console.error("Add to cart error:", error);
+    return {
+      success: false,
+      message: "An error occurred while adding to cart.",
+    };
+  }
+}

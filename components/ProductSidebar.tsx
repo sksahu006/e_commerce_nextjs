@@ -1,9 +1,9 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation"; // use `next/router` for older Next.js versions
+import { useRouter, useSearchParams } from "next/navigation"; // use `next/router` for older Next.js versions
 import { getColors } from "@/app/actions/adminActions/color";
 import { getSizes } from "@/app/actions/adminActions/size";
 import { getAllCategory } from "@/app/actions/adminActions/category";
@@ -13,6 +13,10 @@ const ProductSidebar = () => {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 2000]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+
+
 
   const { data: colors } = useQuery({
     queryKey: ["colors"],
@@ -31,6 +35,33 @@ const ProductSidebar = () => {
     queryFn: () => getAllCategory(),
     staleTime: 1000 * 60 * 5,
   });
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    const categoriesFromUrl = params.get("categories");
+    const sizesFromUrl = params.get("sizes");
+    const colorsFromUrl = params.get("colors");
+    const priceRangeFromUrl = params.get("priceRange");
+
+    if (categoriesFromUrl) {
+      setSelectedCategories(categoriesFromUrl.split(","));
+    }
+
+    if (sizesFromUrl) {
+      setSelectedSizes(sizesFromUrl.split(","));
+    }
+
+    if (colorsFromUrl) {
+      setSelectedColors(colorsFromUrl.split(","));
+    }
+
+    if (priceRangeFromUrl) {
+      const [min, max] = priceRangeFromUrl.split(",").map(Number);
+      setPriceRange([min, max]);
+    }
+  }, [searchParams]);
 
   const updateQuery = (key: string, value: string[] | [number, number]) => {
     const params = new URLSearchParams(window.location.search);
@@ -40,13 +71,13 @@ const ProductSidebar = () => {
         params.delete(key);
       } else {
         if (key === "priceRange") {
-            params.set("minPrice", value[0].toString());
-            params.set("maxPrice", value[1].toString());
-          }
+          params.set("minPrice", value[0].toString());
+          params.set("maxPrice", value[1].toString());
+        }
         params.set(key, value.join(","));
       }
     } else {
-     // params.set(key, value?.toString());
+      // params.set(key, value?.toString());
     }
 
     router.push(`?${params.toString()}`, undefined);
@@ -58,6 +89,14 @@ const ProductSidebar = () => {
       : [...selectedSizes, size];
     setSelectedSizes(updatedSizes);
     updateQuery("sizes", updatedSizes);
+  };
+
+  const handleCategoryChange = (categoryId: string) => {
+    const updatedCategories = selectedCategories.includes(categoryId)
+      ? selectedCategories.filter((id) => id !== categoryId)
+      : [...selectedCategories, categoryId]
+    setSelectedCategories(updatedCategories);
+    updateQuery("categories", updatedCategories);
   };
 
   const handleColorChange = (color: string) => {
@@ -81,7 +120,11 @@ const ProductSidebar = () => {
         <div className="space-y-2">
           {categories?.categories?.map((category) => (
             <div key={category.id} className="flex items-center">
-              <Checkbox id={`category-${category.id}`} />
+              <Checkbox
+                id={`category-${category.id}`}
+                checked={selectedCategories.includes(category.name)} // Check if category is selected
+                onCheckedChange={() => handleCategoryChange(category.name)} // Handle change
+              />
               <label
                 htmlFor={`category-${category.id}`}
                 className="ml-2 text-sm font-medium leading-none"

@@ -1,12 +1,36 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
+import { useRouter } from 'next/navigation'; // For updating the URL
 import { Search, X } from 'lucide-react';
 
 export default function SearchBar() {
   const [isInputVisible, setIsInputVisible] = useState(false);
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const router = useRouter();
+
+ 
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500); 
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (debouncedSearch) {
+      params.set("search", debouncedSearch); 
+    } else {
+      params.delete("search");
+    }
+    router.push(`?${params.toString()}`); 
+  }, [debouncedSearch, router]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
@@ -17,8 +41,10 @@ export default function SearchBar() {
   };
 
   const closeInput = () => {
-    setIsInputVisible(false);
-    setSearch('');
+    setSearch("");
+    const params = new URLSearchParams(window.location.search);
+    params.delete("search");
+    router.push(`?${params.toString()}`); 
   };
 
   return (
