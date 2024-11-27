@@ -8,7 +8,7 @@ import { cartItemsAtom } from '@/stores/atoms/cartAtoms';
 import { useCart } from '@/featues/carts/useCart';
 
 export default function CheckoutCart({ userId }: { userId: string }) {
-  const { cartItems } = useCart(userId);
+  // const { cartItems } = useCart(userId);
   const setCartItems = useSetRecoilState(cartItemsAtom);
   const cartItemsState = useRecoilValue(cartItemsAtom);
 
