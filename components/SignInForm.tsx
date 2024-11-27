@@ -30,7 +30,7 @@ const SignInForm = () => {
 
   useEffect(() => {
     if (status === 'authenticated') {
-      setUser (session.user as SafeUser );
+      setUser (session.user  );
       if (session.user?.isAdmin) {
         router.push("/admin");
       } else {
