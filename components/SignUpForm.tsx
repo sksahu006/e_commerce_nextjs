@@ -44,7 +44,9 @@ export default function SignUpForm() {
   });
 
   const router = useRouter();
+  
   const setUser = useSetRecoilState(userState);
+
   const [generalError, setGeneralError] = useState<string | null>(null);
 
   const onSubmit = async (data: SignUpFormData) => {
@@ -73,7 +75,8 @@ export default function SignUpForm() {
           });
         }
       } else if (result.success && result.user) {
-        setUser(result.user);
+        const { id, email, firstName, isAdmin } = result.user;
+        setUser({ id, email, firstName, isAdmin });
         router.push("/dashboard");
       }
     } catch (error) {
