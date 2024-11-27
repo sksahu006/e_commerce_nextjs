@@ -1,5 +1,5 @@
-
 import { atom } from "recoil";
+
 type SafeUser = {
   id: string;
   email: string;

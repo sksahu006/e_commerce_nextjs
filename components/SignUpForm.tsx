@@ -44,7 +44,7 @@ export default function SignUpForm() {
   });
 
   const router = useRouter();
-  
+
   const setUser = useSetRecoilState(userState);
 
   const [generalError, setGeneralError] = useState<string | null>(null);
@@ -75,7 +75,7 @@ export default function SignUpForm() {
           });
         }
       } else if (result.success && result.user) {
-        const { id, email, firstName, isAdmin } = result.user;
+        const { id, email,firstName, isAdmin } = result.user;
         setUser({ id, email, firstName, isAdmin });
         router.push("/dashboard");
       }
