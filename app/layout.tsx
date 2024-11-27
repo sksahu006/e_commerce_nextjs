@@ -5,6 +5,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Providers } from "./Providers";
 import { Suspense } from "react";
+import { Toaster } from "@/components/ui/toaster";
 
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -44,6 +45,7 @@ export default async function RootLayout({
           {/* <LoadingSpinner /> */}
           <Suspense fallback={<>...loading</>}>
             <main className="mx-auto">{children}</main>
+            <Toaster />
           </Suspense>
           {/* {!hideNavbar && <Footer />} */}
         </Providers>

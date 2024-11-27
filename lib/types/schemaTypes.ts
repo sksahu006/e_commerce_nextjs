@@ -217,6 +217,11 @@ export interface AddToCartParams {
   variantId: string;
   quantity: number;
 }
+export interface deleteToCartParams {
+  userId: string;
+  variantId: string;
+ 
+}
 
 export interface AddToCartResponse {
   success: boolean;

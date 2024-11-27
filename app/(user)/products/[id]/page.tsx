@@ -32,9 +32,10 @@ export default function ProductPage() {
           quantity: 1,
         });
       }
-
+//#ff3f6c
       toast({
         title: "Success",
+        variant:"default",
         description: "Item added to cart",
       });
     } catch (error: any) {

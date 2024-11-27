@@ -41,6 +41,7 @@ export default function SearchBar() {
   };
 
   const closeInput = () => {
+    setIsInputVisible(false);
     setSearch("");
     const params = new URLSearchParams(window.location.search);
     params.delete("search");

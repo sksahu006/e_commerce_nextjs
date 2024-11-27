@@ -20,7 +20,7 @@ export async function addToCart({
     const variant = await prisma.productVariant.findUnique({
       where: { id: variantId },
     });
-    console.log("variant", variant);
+   // console.log("variant", variant);
 
     if (!variant) {
       return { success: false, message: "Product variant not found." };
@@ -117,6 +117,69 @@ export async function getCartItems(userId: string): Promise<CartResponse> {
     return {
       success: false,
       message: "An error occurred while adding to cart.",
+    };
+  }
+}
+export async function deleteFromCart({
+  userId,
+  variantId,
+}: {
+  userId: string;
+  variantId: string;
+}) {
+  if (!userId || !variantId) {
+    return {
+      success: false,
+      message: "User ID and Variant ID are required.",
+    };
+  }
+
+  try {
+    const cart = await prisma.cart.findUnique({
+      where: { userId },
+    });
+
+    if (!cart) {
+      return {
+        success: false,
+        message: "Cart not found.",
+      };
+    }
+
+    const existingCartItem = await prisma.cartItem.findUnique({
+      where: {
+        cartId_variantId: {
+          cartId: cart.id,
+          variantId,
+        },
+      },
+    });
+
+    if (!existingCartItem) {
+      return {
+        success: false,
+        message: "Cart item not found.",
+      };
+    }
+
+    await prisma.cartItem.delete({
+      where: { id: existingCartItem.id },
+    });
+
+    const updatedCount = await prisma.cartItem.count({
+      where: { cartId: cart.id },
+    });
+
+    return {
+      success: true,
+      message: "Item removed from cart.",
+      count: updatedCount,
+    };
+  } catch (error) {
+    console.error("Delete from cart error:", error);
+    return {
+      success: false,
+      message: "An error occurred while removing the item from the cart.",
     };
   }
 }

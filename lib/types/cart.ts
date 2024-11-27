@@ -3,6 +3,7 @@ import { Decimal } from "@prisma/client/runtime/library";
 export type CartItem = {
   id: string;
   quantity: number;
+  variantId:string;
   variant: {
     product: {
       name: string;

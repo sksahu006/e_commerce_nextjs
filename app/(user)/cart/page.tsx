@@ -1,21 +1,30 @@
 "use client";
 
-import { Minus, Plus, X } from "lucide-react";
+import { Loader2, Minus, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { cartItemsAtom } from "@/stores/atoms/cartAtoms";
 import { useCart } from "@/featues/carts/useCart";
+import { useSession } from "next-auth/react";
 
 export default function CheckoutCart({
   params,
 }: {
   params: { userId: string };
 }) {
-  const userId = params.userId;
+
+  // const userId = params.userId;
+  const { data: session } = useSession();
+  const userId = session?.user?.id || '';
   const { cartItems } = useCart(userId);
   const setCartItems = useSetRecoilState(cartItemsAtom);
   const cartItemsState = useRecoilValue(cartItemsAtom);
+  const { deleteFromCartMutation } = useCart(userId as string);
+  const loading=deleteFromCartMutation.isPending 
+
+  console.log(cartItems)
+
 
   const updateQuantity = (id: string, newQuantity: number) => {
     setCartItems(
@@ -25,8 +34,13 @@ export default function CheckoutCart({
     );
   };
 
-  const removeItem = (id: string) => {
-    setCartItems(cartItemsState.filter((item) => item.id !== id));
+  const removeItem = (variantId: string) => {
+    setCartItems(cartItemsState.filter((item) => item.id !== variantId));
+    deleteFromCartMutation.mutateAsync({
+      userId,
+      variantId
+    })
+    
   };
 
   const subtotal = cartItemsState.reduce(
@@ -39,7 +53,7 @@ export default function CheckoutCart({
       sum +
       (Number(item.variant.product.basePrice || 0) -
         Number(item.variant.product.discountPrice || 0)) *
-        item.quantity,
+      item.quantity,
     0
   );
   const total = subtotal;
@@ -50,13 +64,18 @@ export default function CheckoutCart({
 
   return (
     <div className="container mx-auto px-4 py-8">
+       {loading && (
+        <div className="absolute inset-x-0 top-1/2 flex justify-center items-center z-50">
+          <Loader2 className="h-28 w-28 text-blue-500 animate-spin" />
+        </div>
+      )}
       <h1 className="text-3xl font-bold mb-8">Your Cart</h1>
       <div className="flex flex-col lg:flex-row gap-8">
-        <div className="lg:w-2/3">
+        <div className="lg:w-2/3 bg-gray-50 p-2">
           {cartItemsState?.map((item) => (
             <div
               key={item.id}
-              className="flex flex-col sm:flex-row items-center gap-4 border-b border-gray-200 py-4"
+              className="flex flex-col sm:flex-row items-center gap-4 shadow-sm  border-b-2 border-gray-300 py-4"
             >
               <div className="w-full sm:w-1/3">
                 <img
@@ -66,11 +85,11 @@ export default function CheckoutCart({
                 />
               </div>
               <div className="flex-1 space-y-2">
-                <h2 className="text-xl font-semibold">
+                <h2 className="text-xl font-Oswald font-semibold">
                   {item.variant.product.name}
                 </h2>
-                <p className="text-gray-600">Size: {item.variant.size.name}</p>
-                <p className="text-gray-600">
+                <p className="text-gray-700 font-Raleway">Size: {item.variant.size.name}</p>
+                <p className="text-gray-800 font-Raleway font-semibold">
                   Color: {item.variant.color.name}
                 </p>
                 <div className="flex items-center gap-2">
@@ -79,10 +98,10 @@ export default function CheckoutCart({
                   </span>
                   {Number(item.variant.product.basePrice) !==
                     Number(item.variant.product.discountPrice) && (
-                    <span className="text-sm text-gray-500 line-through">
-                      ₹{Number(item.variant.product.basePrice).toFixed(2)}
-                    </span>
-                  )}
+                      <span className="text-sm text-gray-500 line-through">
+                        ₹{Number(item.variant.product.basePrice).toFixed(2)}
+                      </span>
+                    )}
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex items-center border rounded-md">
@@ -118,7 +137,7 @@ export default function CheckoutCart({
                 variant="ghost"
                 size="icon"
                 className="self-start"
-                onClick={() => removeItem(item.id)}
+                onClick={() => removeItem(item?.variantId)}
               >
                 <X className="h-4 w-4" />
               </Button>
