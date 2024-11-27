@@ -1,5 +1,5 @@
 // src/lib/auth.ts
-import { NextAuthOptions, User } from "next-auth";
+import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
@@ -8,9 +8,10 @@ import { prisma } from "@/lib/prisma";
 // Extend the built-in session types
 declare module "next-auth" {
   interface Session {
-    user: User & {
+    user: {
       id: string;
       email: string;
+      name: string;
       isAdmin: boolean;
     };
   }
@@ -18,6 +19,7 @@ declare module "next-auth" {
   interface User {
     id: string;
     email: string;
+    name: string;
     isAdmin: boolean;
   }
 }
@@ -38,7 +40,7 @@ export const authConfig: NextAuthOptions = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials, req): Promise<User | null> {
+      async authorize(credentials): Promise<any | null> {
         if (!credentials?.email || !credentials.password) {
           return null;
         }
@@ -61,7 +63,7 @@ export const authConfig: NextAuthOptions = {
         }
 
         return {
-          id: user.id.toString(),
+          id: user.id,
           email: user.email,
           name: user.username,
           isAdmin: user.isAdmin,
@@ -74,12 +76,12 @@ export const authConfig: NextAuthOptions = {
       clientSecret: process.env.clientSecret!,
 
       async profile(profile) {
-        const existingUser = await prisma.user.findUnique({
+        let user = await prisma.user.findUnique({
           where: { email: profile.email },
         });
 
-        if (!existingUser) {
-          await prisma.user.create({
+        if (!user) {
+          user = await prisma.user.create({
             data: {
               email: profile.email,
               username: profile.name,
@@ -92,10 +94,10 @@ export const authConfig: NextAuthOptions = {
         }
 
         return {
-          id: profile.sub,
-          email: profile.email,
-          name: profile.name,
-          isAdmin: false,
+          id: user.id, 
+          email: user.email,
+          name: user.username,
+          isAdmin: user.isAdmin,
         };
       },
     }),
@@ -115,9 +117,13 @@ export const authConfig: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      if (token && session.user) {
-        session.user.id = token.id;
-        session.user.isAdmin = token.isAdmin;
+      if (token) {
+        session.user = {
+          id: token.id,
+          email: token.email!,
+          name: session.user?.name || "", 
+          isAdmin: token.isAdmin,
+        };
       }
       return session;
     },

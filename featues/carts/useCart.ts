@@ -1,22 +1,42 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useRecoilState } from 'recoil';
-import { AddToCartParams } from '@/lib/types/schemaTypes';
-import { addToCart, getCartCount } from '@/app/actions/userActions/cartActions';
-import { cartCountState } from '@/stores/atoms/cartAtoms';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRecoilState } from "recoil";
+import { AddToCartParams } from "@/lib/types/schemaTypes";
+import {
+  addToCart,
+  getCartCount,
+  getCartItems,
+} from "@/app/actions/userActions/cartActions";
+import { cartCountState, cartItemsAtom } from "@/stores/atoms/cartAtoms";
 
 export const useCart = (userId: string) => {
   const [cartCount, setCartCount] = useRecoilState(cartCountState);
+  const [cartItems, setCartItems] = useRecoilState(cartItemsAtom);
   const queryClient = useQueryClient();
 
-  // Query to fetch cart count using server action
-  const { data: initialCartCount } = useQuery({
-    queryKey: ['cartCount', userId],
+  // Fetch cart count
+  useQuery({
+    queryKey: ["cartCount", userId],
     queryFn: async () => {
       const count = await getCartCount(userId);
       setCartCount(count);
       return count;
     },
-    enabled: !!userId, // Only run query if userId exists
+    enabled: !!userId,
+  });
+
+  useQuery({
+    queryKey: ["cartItems", userId],
+    queryFn: async () => {
+      const cartResponse = await getCartItems(userId);
+      if (cartResponse.success && cartResponse.cart) {
+        setCartItems(cartResponse.cart.cartItems); 
+        return cartResponse.cart.cartItems; 
+      } else {
+        setCartItems([]); 
+        return [];
+      }
+    },
+    enabled: !!userId,
   });
 
   // Mutation to add to cart
@@ -32,12 +52,14 @@ export const useCart = (userId: string) => {
       if (data.count !== undefined) {
         setCartCount(data.count);
       }
-      queryClient.invalidateQueries({ queryKey: ['cartCount', userId] });
+      queryClient.invalidateQueries({ queryKey: ["cartItems", userId] });
+      queryClient.invalidateQueries({ queryKey: ["cartCount", userId] });
     },
   });
 
   return {
     cartCount,
+    cartItems,
     addToCartMutation,
   };
 };

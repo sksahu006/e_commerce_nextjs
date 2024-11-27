@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { Cart, CartResponse } from "@/lib/types/cart";
 import { AddToCartParams, AddToCartResponse } from "@/lib/types/schemaTypes";
 
 export async function addToCart({
@@ -84,22 +85,33 @@ export async function getCartCount(userId: string) {
   return count;
 }
 
-export async function getCartItems(userId: string) {
+export async function getCartItems(userId: string): Promise<CartResponse> {
   if (!userId) throw new Error("User ID is required");
 
   try {
     const cart = await prisma.cart.findUnique({
       where: { userId },
-      select: {
+      include: {
         cartItems: {
-          select:{
-            
-          }
-        }
-      }
-
-    })
-
+          include: {
+            variant: {
+              select: {
+                product: {
+                  select: { name: true, basePrice: true, discountPrice: true,images:true },
+                },
+                size: { select: { name: true } },
+                color: { select: { name: true, hexCode: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+    return {
+      success: true,
+      message: "Cart Items fetched Successfully",
+      cart,
+    };
   } catch (error) {
     console.error("Add to cart error:", error);
     return {

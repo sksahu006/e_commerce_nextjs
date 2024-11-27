@@ -1,29 +1,32 @@
-export interface CartItem {
-    id: string;
-    variantId: string;
-    quantity: number;
-    variant: {
-      id: string;
-      product: {
-        id: string;
-        name: string;
-        images: string[];
-        basePrice: number;
-        discountPrice: number | null;
-      };
-      size: {
-        name: string;
-      };
-      color: {
-        name: string;
-        hexCode: string;
-      };
+import { Decimal } from "@prisma/client/runtime/library";
+
+export type CartItem = {
+  id: string;
+  quantity: number;
+  variant: {
+    product: {
+      name: string;
+      basePrice: Decimal;
+      discountPrice: Decimal | null; 
+      images: string[];
     };
-  }
-  
-  export interface CartState {
-    items: CartItem[];
-    isOpen: boolean;
-    isLoading: boolean;
-  }
-  
+    size: {
+      name: string;
+    };
+    color: {
+      name: string;
+      hexCode: string;
+    };
+  };
+};
+
+export type Cart = {
+  id: string;
+  cartItems: CartItem[];
+};
+
+export type CartResponse = {
+  success: boolean;
+  message: string;
+  cart?: Cart | null;
+};

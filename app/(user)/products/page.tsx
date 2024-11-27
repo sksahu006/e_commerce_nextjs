@@ -46,7 +46,14 @@ export default function ProductSection() {
         maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
     })
 
-    if (isLoading || isFetching) return <div><CardSkeliton /></div>;
+    if (isLoading || isFetching) return <div className="pt-28 flex flex-col md:flex-row gap-8">
+        <ProductSidebar />
+        <span>
+           <CardSkeliton/>
+        </span>
+
+
+    </div>;
 
     if (isError) return <div>Error fetching products.</div>;
 
@@ -75,7 +82,7 @@ export default function ProductSection() {
                         <h2 className="text-2xl font-bold">Products</h2>
 
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
 
                         {data?.map((product) => (
                             <Link href={`/products/${product.id}`}>
