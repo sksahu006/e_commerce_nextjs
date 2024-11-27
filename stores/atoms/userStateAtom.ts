@@ -1,6 +1,11 @@
-import { SafeUser } from "@/lib/types/schemaTypes";
-import { atom } from "recoil";
 
+import { atom } from "recoil";
+type SafeUser = {
+  id: string;
+  email: string;
+  name: string;
+  isAdmin: boolean;
+}
 export const userState = atom<SafeUser | null>({
   key: "userState",
   default: null,
