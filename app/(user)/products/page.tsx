@@ -82,7 +82,7 @@ export default function ProductSection() {
                         <h2 className="text-2xl font-bold">Products</h2>
 
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
 
                         {data?.map((product) => (
                             <Link href={`/products/${product.id}`}>
@@ -92,10 +92,10 @@ export default function ProductSection() {
                                             <img
                                                 src={product.images[0]}
                                                 alt={product.name}
-                                                className="absolute h-[100%] w-full inset-0 transition-opacity duration-300 rounded-md "
+                                                className="absolute h-[100%] w-full object-cover inset-0 transition-opacity duration-300 rounded-md "
                                             />
                                             <span className="absolute  font-bold uppercase text-center tracking-widest w-full text-white bottom-0 font-TwentiethCenturyforKenmoreLight left-0 text-[12px] bg-gray-900/70 text-primary-foreground p-2">
-                                                premium knit fabric
+                                                {product.categories[0].category.name}
                                             </span>
                                             <span className="absolute  font-bold uppercase text-center tracking-widest  text-white top-3 font-TwentiethCenturyforKenmoreLight right-3 text-[12px] bg-gray-50/10 text-primary-foreground rounded-full flex items-center justify-center p-1">
                                                 <HeartIcon className="text-white h-4 w-4 " />
@@ -107,11 +107,11 @@ export default function ProductSection() {
 
                                     <div className="p-2 ">
                                         <div className="flex w-full ">
-                                            <h3 className="font-extrabold font-thunder-lc  text-gray-800 text-lg">{product.name}</h3>
+                                            <h3 className="font-extrabold font-thunder-lc tracking-wide text-gray-800 text-lg">{product.name}</h3>
 
                                         </div>
 
-                                        <span className="text-xs font-ShackletonTest font-thin text-gray-500 tracking-wide  line-clamp-1">{product?.description} </span>
+                                        <span className="text-sm font-TwentiethCenturyforKenmoreLight font-thin text-gray-500 tracking-wide  line-clamp-1">{product?.description} </span>
                                         <div className="flex  font-ShackletonTest items-center">
                                             <span className="text-sm font-bold">Rs.{Number(product?.discountPrice).toFixed(2)}</span>
                                             <span className="text-xs ml-2 text-gray-400 line-through ">Rs.{Number(product?.basePrice).toFixed(2)}</span>

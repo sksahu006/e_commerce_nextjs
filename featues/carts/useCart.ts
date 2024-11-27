@@ -3,6 +3,7 @@ import { useRecoilState } from "recoil";
 import { AddToCartParams } from "@/lib/types/schemaTypes";
 import {
   addToCart,
+  deleteFromCart,
   getCartCount,
   getCartItems,
 } from "@/app/actions/userActions/cartActions";
@@ -29,10 +30,10 @@ export const useCart = (userId: string) => {
     queryFn: async () => {
       const cartResponse = await getCartItems(userId);
       if (cartResponse.success && cartResponse.cart) {
-        setCartItems(cartResponse.cart.cartItems); 
-        return cartResponse.cart.cartItems; 
+        setCartItems(cartResponse.cart.cartItems);
+        return cartResponse.cart.cartItems;
       } else {
-        setCartItems([]); 
+        setCartItems([]);
         return [];
       }
     },
@@ -57,9 +58,33 @@ export const useCart = (userId: string) => {
     },
   });
 
+  const deleteFromCartMutation = useMutation({
+    mutationFn: async ({
+      userId,
+      variantId,
+    }: {
+      userId: string;
+      variantId: string;
+    }) => {
+      const result = await deleteFromCart({ userId, variantId });
+      if (!result.success) {
+        throw new Error(result.message);
+      }
+      return result;
+    },
+    onSuccess: (data) => {
+      if (data.count !== undefined) {
+        setCartCount(data.count);
+      }
+      queryClient.invalidateQueries({ queryKey: ["cartItems", userId] });
+      queryClient.invalidateQueries({ queryKey: ["cartCount", userId] });
+    },
+  });
+
   return {
     cartCount,
     cartItems,
     addToCartMutation,
+    deleteFromCartMutation
   };
 };
