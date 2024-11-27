@@ -1,9 +1,9 @@
-
 import { atom } from "recoil";
+
 type SafeUser = {
   id: string;
   email: string;
-  username: string;
+  firstName?: string;
   isAdmin: boolean;
 }
 export const userState = atom<SafeUser | null>({

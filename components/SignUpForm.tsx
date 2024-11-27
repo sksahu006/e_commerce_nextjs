@@ -75,8 +75,8 @@ export default function SignUpForm() {
           });
         }
       } else if (result.success && result.user) {
-        const { id, email, username, isAdmin } = result.user;
-        setUser({ id, email, username, isAdmin });
+        const { id, email,firstName, isAdmin } = result.user;
+        setUser({ id, email, firstName, isAdmin });
         router.push("/dashboard");
       }
     } catch (error) {

@@ -11,7 +11,7 @@ declare module "next-auth" {
     user: {
       id: string;
       email: string;
-      username: string;
+      name: string;
       isAdmin: boolean;
     };
   }
@@ -19,7 +19,7 @@ declare module "next-auth" {
   interface User {
     id: string;
     email: string;
-    username: string;
+    name: string;
     isAdmin: boolean;
   }
 }
@@ -65,7 +65,8 @@ export const authConfig: NextAuthOptions = {
         return {
           id: user.id,
           email: user.email,
-          username: user.username,
+          name: user.username,
+          firstName: user.firstName,
           isAdmin: user.isAdmin,
         };
       },
@@ -75,7 +76,7 @@ export const authConfig: NextAuthOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.clientSecret!,
 
-      async profile(profile ) {
+      async profile(profile) {
         let user = await prisma.user.findUnique({
           where: { email: profile.email },
         });
@@ -94,9 +95,10 @@ export const authConfig: NextAuthOptions = {
         }
 
         return {
-          id: user.id, 
+          id: user.id,
           email: user.email,
-          username: user.username,
+          name: user.username,
+          firstName: user.firstName,
           isAdmin: user.isAdmin,
         };
       },
@@ -121,7 +123,7 @@ export const authConfig: NextAuthOptions = {
         session.user = {
           id: token.id,
           email: token.email!,
-          username: session.user?.username || "", 
+          name: session.user?.name || "",
           isAdmin: token.isAdmin,
         };
       }
