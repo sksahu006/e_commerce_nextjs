@@ -66,6 +66,7 @@ export const authConfig: NextAuthOptions = {
           id: user.id,
           email: user.email,
           name: user.username,
+          firstName: user.firstName,
           isAdmin: user.isAdmin,
         };
       },
@@ -94,9 +95,10 @@ export const authConfig: NextAuthOptions = {
         }
 
         return {
-          id: user.id, 
+          id: user.id,
           email: user.email,
           name: user.username,
+          firstName: user.firstName,
           isAdmin: user.isAdmin,
         };
       },
@@ -121,7 +123,7 @@ export const authConfig: NextAuthOptions = {
         session.user = {
           id: token.id,
           email: token.email!,
-          name: session.user?.name || "", 
+          name: session.user?.name || "",
           isAdmin: token.isAdmin,
         };
       }
