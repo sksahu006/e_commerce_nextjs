@@ -6,12 +6,12 @@ import { Facebook, Instagram, Mail, Twitter } from "lucide-react"
 
 export default function Footer() {
   return (
-    <footer className=" border-t-[1px] font-TwentiethCenturyforKenmoreLight font-semibold  py-12 px-4 md:px-6">
+    <footer className=" border-t-[1px]  pt-11 mt-10 font-TwentiethCenturyforKenmoreLight font-semibold bg-yellow-50 py-12 px-4 md:px-6">
       <div className="container mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand Logo and Tagline */}
           <div className="space-y-4">
-            <Image src="/placeholder.svg" alt="Brand Logo" width={120} height={40} className="bg-white" />
+            <Image src="/kraken-logo.png" alt="Brand Logo" width={40} height={40} className="bg-white" />
             <p className="text-sm tracking-widest">Elevate your style with our curated collection of modern fashion essentials.</p>
           </div>
 
