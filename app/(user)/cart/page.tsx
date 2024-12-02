@@ -23,7 +23,6 @@ export default function CheckoutCart({
   const { deleteFromCartMutation } = useCart(userId as string);
   const loading=deleteFromCartMutation.isPending 
 
-  console.log(cartItems)
 
 
   const updateQuantity = (id: string, newQuantity: number) => {
@@ -69,7 +68,8 @@ export default function CheckoutCart({
           <Loader2 className="h-28 w-28 text-blue-500 animate-spin" />
         </div>
       )}
-      <h1 className="text-3xl font-bold mb-8">Your Cart</h1>
+      <h1 className="text-3xl pt-20 text-gray-700 font-bold mb-8">My Bag</h1>
+      <div className="flex items-center justify-center"><img src="https://images.bewakoof.com/web/icon-cart-savings.gif" className="h-7 w-7"   /> "You are saving ₹1200 on this order</div>
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="lg:w-2/3 bg-gray-50 p-2">
           {cartItemsState?.map((item) => (
@@ -85,11 +85,11 @@ export default function CheckoutCart({
                 />
               </div>
               <div className="flex-1 space-y-2">
-                <h2 className="text-xl font-Oswald font-semibold">
+                <h2 className=" font-Oswald text-[#117a7a] font-semibold">
                   {item.variant.product.name}
                 </h2>
                 <p className="text-gray-700 font-Raleway">Size: {item.variant.size.name}</p>
-                <p className="text-gray-800 font-Raleway font-semibold">
+                <p className="text-gray-800 font-DM-sans font-semibold">
                   Color: {item.variant.color.name}
                 </p>
                 <div className="flex items-center gap-2">
@@ -101,8 +101,14 @@ export default function CheckoutCart({
                       <span className="text-sm text-gray-500 line-through">
                         ₹{Number(item.variant.product.basePrice).toFixed(2)}
                       </span>
+                  
                     )}
+                       <span className="text-xs text-green-600 font-bold">
+                       You saved ₹1,200
+                  </span>
+                       
                 </div>
+                <span className="text-xs font-Raleway text-gray-700">MRP incl. of all taxes</span>
                 <div className="flex items-center gap-2">
                   <div className="flex items-center border rounded-md">
                     <Button
