@@ -7,7 +7,7 @@ export default function CardSkeliton() {
         <div key={index} className="bg-card rounded-lg shadow-md overflow-hidden">
           {/* Image placeholder */}
           <div className="relative pb-[100%]">
-            <Skeleton className="absolute bg-slate-500 inset-0" />
+            <Skeleton className="absolute bg-slate-200 inset-0" />
           </div>
           
           <div className="p-4 space-y-4">

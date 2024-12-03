@@ -16,7 +16,7 @@ export function useFilteredProducts(filters: ProductFilter = {}) {
   return useQuery({
     queryKey: ["filteredProducts", filters], 
     queryFn: () => fetchAllProducts(filters),
-    staleTime: 1000 * 60 * 5, 
+    staleTime: 1000 * 60 * 60, 
     placeholderData: [],
   });
 }
