@@ -7,23 +7,24 @@ import { useRecoilValue, useSetRecoilState } from "recoil";
 import { cartItemsAtom } from "@/stores/atoms/cartAtoms";
 import { useCart } from "@/featues/carts/useCart";
 import { useSession } from "next-auth/react";
+import { useEffect } from "react";
+import Script from "next/script";
+import { useRouter } from "next/navigation";
 
 export default function CheckoutCart({
   params,
 }: {
   params: { userId: string };
 }) {
-
   // const userId = params.userId;
   const { data: session } = useSession();
-  const userId = session?.user?.id || '';
+  const userId = session?.user?.id || "";
   const { cartItems } = useCart(userId);
   const setCartItems = useSetRecoilState(cartItemsAtom);
   const cartItemsState = useRecoilValue(cartItemsAtom);
   const { deleteFromCartMutation } = useCart(userId as string);
-  const loading=deleteFromCartMutation.isPending 
-
-
+  const loading = deleteFromCartMutation.isPending;
+  const router = useRouter();
 
   const updateQuantity = (id: string, newQuantity: number) => {
     setCartItems(
@@ -37,9 +38,8 @@ export default function CheckoutCart({
     setCartItems(cartItemsState.filter((item) => item.id !== variantId));
     deleteFromCartMutation.mutateAsync({
       userId,
-      variantId
-    })
-    
+      variantId,
+    });
   };
 
   const subtotal = cartItemsState.reduce(
@@ -52,7 +52,7 @@ export default function CheckoutCart({
       sum +
       (Number(item.variant.product.basePrice || 0) -
         Number(item.variant.product.discountPrice || 0)) *
-      item.quantity,
+        item.quantity,
     0
   );
   const total = subtotal;
@@ -61,15 +61,79 @@ export default function CheckoutCart({
     0
   );
 
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+
+    // Cleanup when the component is unmounted
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  const handleCheckout = async () => {
+    // try {
+    //   // Create database order and get Razorpay details
+    //   const orderResponse = await fetch("/api/payment/create-order", {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" }
+    //   });
+  
+    //   if (!orderResponse.ok) throw new Error("Failed to create order");
+    //   const { id, amount, currency } = await orderResponse.json();
+  
+    //   // Initialize Razorpay
+    //   const options = {
+    //     key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+    //     amount,
+    //     currency,
+    //     order_id: id,
+    //     handler: async (response: any) => {
+    //       // Verify payment
+    //       const verifyResponse = await fetch("/api/payment/verify", {
+    //         method: "POST",
+    //         headers: { "Content-Type": "application/json" },
+    //         body: JSON.stringify(response)
+    //       });
+  
+    //       if (!verifyResponse.ok) throw new Error("Payment verification failed");
+          
+    //       // Clear local cart state
+    //       setCartItems([]);
+    //       alert("Payment successful!");
+    //     }
+    //   };
+  
+    //   const razorpay = new (window as any).Razorpay(options);
+    //   razorpay.open();
+    // } catch (error) {
+    //   console.error("Checkout failed:", error);
+    //   alert("Checkout process failed. Please try again.");
+    // }
+    router.push("/cart/address");
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
-       {loading && (
+      <Script
+        id="razorpay-checkout-js"
+        src="https://checkout.razorpay.com/v1/checkout.js"
+      />
+      {loading && (
         <div className="absolute inset-x-0 top-1/2 flex justify-center items-center z-50">
           <Loader2 className="h-28 w-28 text-blue-500 animate-spin" />
         </div>
       )}
       <h1 className="text-3xl pt-20 text-gray-700 font-bold mb-8">My Bag</h1>
-      <div className="flex items-center justify-center"><img src="https://images.bewakoof.com/web/icon-cart-savings.gif" className="h-7 w-7"   /> "You are saving ₹1200 on this order</div>
+      <div className="flex items-center justify-center">
+        <img
+          src="https://images.bewakoof.com/web/icon-cart-savings.gif"
+          className="h-7 w-7"
+        />{" "}
+        "You are saving ₹1200 on this order
+      </div>
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="lg:w-2/3 bg-gray-50 p-2">
           {cartItemsState?.map((item) => (
@@ -88,7 +152,9 @@ export default function CheckoutCart({
                 <h2 className=" font-Oswald text-[#117a7a] font-semibold">
                   {item.variant.product.name}
                 </h2>
-                <p className="text-gray-700 font-Raleway">Size: {item.variant.size.name}</p>
+                <p className="text-gray-700 font-Raleway">
+                  Size: {item.variant.size.name}
+                </p>
                 <p className="text-gray-800 font-DM-sans font-semibold">
                   Color: {item.variant.color.name}
                 </p>
@@ -98,17 +164,17 @@ export default function CheckoutCart({
                   </span>
                   {Number(item.variant.product.basePrice) !==
                     Number(item.variant.product.discountPrice) && (
-                      <span className="text-sm text-gray-500 line-through">
-                        ₹{Number(item.variant.product.basePrice).toFixed(2)}
-                      </span>
-                  
-                    )}
-                       <span className="text-xs text-green-600 font-bold">
-                       You saved ₹1,200
+                    <span className="text-sm text-gray-500 line-through">
+                      ₹{Number(item.variant.product.basePrice).toFixed(2)}
+                    </span>
+                  )}
+                  <span className="text-xs text-green-600 font-bold">
+                    You saved ₹1,200
                   </span>
-                       
                 </div>
-                <span className="text-xs font-Raleway text-gray-700">MRP incl. of all taxes</span>
+                <span className="text-xs font-Raleway text-gray-700">
+                  MRP incl. of all taxes
+                </span>
                 <div className="flex items-center gap-2">
                   <div className="flex items-center border rounded-md">
                     <Button
@@ -172,7 +238,10 @@ export default function CheckoutCart({
             <div className="mb-4">
               <Input placeholder="Enter promo code" />
             </div>
-            <Button className="w-full uppercase h-14 text-xl font-bold text-white">
+            <Button
+              onClick={handleCheckout}
+              className="w-full uppercase h-14 text-xl font-bold text-white"
+            >
               Proceed to Checkout
             </Button>
           </div>
