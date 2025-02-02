@@ -21,6 +21,7 @@ model User {
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
   orders            Order[]
+  paymentMethods    PaymentMethod[] // Add this inverse relation
   reviews           Review[]
   shippingAddresses ShippingAddress[]
   cart              Cart?
@@ -28,72 +29,72 @@ model User {
 }
 
 model Product {
-  id              String            @id @default(uuid())
-  name            String
-  slug            String            @unique
-  images          String[] 
-  description     String?
-  basePrice       Decimal           @db.Decimal(10, 2)
-  discountPrice   Decimal?          @db.Decimal(10, 2)
-  featured        Boolean           @default(false)
-  status          String            @default("draft")
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  brand           Brand             @relation(fields: [brandId], references: [id])
-  brandId         String
-  categories      ProductCategory[]
-  variants        ProductVariant[]
-  reviews         Review[]
-  wishlistItems   WishlistItem[]
+  id            String            @id @default(uuid())
+  name          String
+  slug          String            @unique
+  images        String[]
+  description   String?
+  basePrice     Decimal           @db.Decimal(10, 2)
+  discountPrice Decimal?          @db.Decimal(10, 2)
+  featured      Boolean           @default(false)
+  status        String            @default("draft")
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  brand         Brand             @relation(fields: [brandId], references: [id])
+  brandId       String
+  categories    ProductCategory[]
+  variants      ProductVariant[]
+  reviews       Review[]
+  wishlistItems WishlistItem[]
 }
 
 model Brand {
-  id              String            @id @default(uuid())
-  name            String            @unique
-  logo            String?
-  description     String?
-  products        Product[]
+  id          String    @id @default(uuid())
+  name        String    @unique
+  logo        String?
+  description String?
+  products    Product[]
 }
 
 model Category {
-  id              String            @id @default(uuid())
-  name            String            @unique
-  description     String?
-  products        ProductCategory[]
+  id          String            @id @default(uuid())
+  name        String            @unique
+  description String?
+  products    ProductCategory[]
 }
 
 model ProductCategory {
-  product         Product           @relation(fields: [productId], references: [id])
-  productId       String
-  category        Category          @relation(fields: [categoryId], references: [id])
-  categoryId      String
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  String
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String
 
   @@id([productId, categoryId])
 }
 
 model Size {
-  id              String            @id @default(uuid())
-  name            String            @unique
-  variants        ProductVariant[]
+  id       String           @id @default(uuid())
+  name     String           @unique
+  variants ProductVariant[]
 }
 
 model Color {
-  id              String            @id @default(uuid())
-  name            String            @unique
-  hexCode         String            @unique
-  variants        ProductVariant[]
+  id       String           @id @default(uuid())
+  name     String           @unique
+  hexCode  String           @unique
+  variants ProductVariant[]
 }
 
 model ProductVariant {
-  id              String            @id @default(uuid())
-  product         Product           @relation(fields: [productId], references: [id])
+  id              String      @id @default(uuid())
+  product         Product     @relation(fields: [productId], references: [id])
   productId       String
-  size            Size              @relation(fields: [sizeId], references: [id])
+  size            Size        @relation(fields: [sizeId], references: [id])
   sizeId          String
-  color           Color             @relation(fields: [colorId], references: [id])
+  color           Color       @relation(fields: [colorId], references: [id])
   colorId         String
-  stockQuantity   Int               @default(0)
-  additionalPrice Decimal           @default(0) @db.Decimal(10, 2)
+  stockQuantity   Int         @default(0)
+  additionalPrice Decimal     @default(0) @db.Decimal(10, 2)
   orderItems      OrderItem[]
   cartItems       CartItem[]
 
@@ -101,118 +102,126 @@ model ProductVariant {
 }
 
 model Order {
-  id              String            @id @default(uuid())
-  user            User              @relation(fields: [userId], references: [id])
-  userId          String
-  status          String
-  totalAmount     Decimal           @db.Decimal(10, 2)
-  quantity        Int
-  trackingNumber  String?
-  shippingAddress ShippingAddress   @relation(fields: [shippingAddressId], references: [id])
+  id                String          @id @default(uuid())
+  user              User            @relation(fields: [userId], references: [id])
+  userId            String
+  status            String          @default("INITIATED") // 'INITIATED', 'PENDING', 'PAID', 'FAILED', 'REFUNDED'
+  totalAmount       Decimal         @db.Decimal(10, 2)
+  quantity          Int
+  trackingNumber    String?
+  shippingAddress   ShippingAddress @relation(fields: [shippingAddressId], references: [id])
   shippingAddressId String
-  paymentMethod   PaymentMethod     @relation(fields: [paymentMethodId], references: [id])
-  paymentMethodId String
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  orderItems      OrderItem[]
+  paymentMethod     PaymentMethod?  @relation(fields: [paymentMethodId], references: [id])
+  paymentMethodId   String?         @unique
+  razorpayOrderId   String?         @unique
+  razorpayPaymentId String? // Razorpay payment ID
+  razorpaySignature String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  orderItems        OrderItem[]
 }
 
 model OrderItem {
-  id              String            @id @default(uuid())
-  order           Order             @relation(fields: [orderId], references: [id])
-  orderId         String
-  variant         ProductVariant    @relation(fields: [variantId], references: [id])
-  variantId       String
-  quantity        Int
-  pricePerUnit    Decimal           @db.Decimal(10, 2)
+  id           String         @id @default(uuid())
+  order        Order          @relation(fields: [orderId], references: [id])
+  orderId      String
+  variant      ProductVariant @relation(fields: [variantId], references: [id])
+  variantId    String
+  quantity     Int
+  pricePerUnit Decimal        @db.Decimal(10, 2)
 }
 
 model ShippingAddress {
-  id              String            @id @default(uuid())
-  user            User              @relation(fields: [userId], references: [id])
-  userId          String
-  fullName        String
-  addressLine1    String
-  addressLine2    String?
-  city            String
-  state           String
-  postalCode      String
-  country         String
-  phoneNumber     String?
-  default         Boolean           @default(false)
-  orders          Order[]
+  id           String  @id @default(uuid())
+  user         User    @relation(fields: [userId], references: [id])
+  userId       String
+  fullName     String
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  state        String
+  postalCode   String
+  country      String
+  phoneNumber  String?
+  default      Boolean @default(false)
+  orders       Order[]
 }
 
 model Review {
-  id              String            @id @default(uuid())
-  product         Product           @relation(fields: [productId], references: [id])
-  productId       String
-  user            User              @relation(fields: [userId], references: [id])
-  userId          String
-  title           String?
-  rating          Int
-  comment         String?
-  createdAt       DateTime          @default(now())
+  id        String   @id @default(uuid())
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  title     String?
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
 }
 
 model Coupon {
-  id              String            @id @default(uuid())
-  code            String            @unique
-  discountType    String            // 'percentage' or 'fixed'
-  discountValue   Decimal           @db.Decimal(10, 2)
-  validFrom       DateTime
-  validTo         DateTime
-  isActive        Boolean           @default(true)
-  usageLimit      Int?              // null means unlimited
-  usageCount      Int               @default(0)
+  id            String   @id @default(uuid())
+  code          String   @unique
+  discountType  String // 'percentage' or 'fixed'
+  discountValue Decimal  @db.Decimal(10, 2)
+  validFrom     DateTime
+  validTo       DateTime
+  isActive      Boolean  @default(true)
+  usageLimit    Int? // null means unlimited
+  usageCount    Int      @default(0)
 }
 
 model Cart {
-  id              String            @id @default(uuid())
-  user            User              @relation(fields: [userId], references: [id])
-  userId          String            @unique
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  cartItems       CartItem[]
+  id        String     @id @default(uuid())
+  user      User       @relation(fields: [userId], references: [id])
+  userId    String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  cartItems CartItem[]
 }
 
 model CartItem {
-  id              String            @id @default(uuid())
-  cart            Cart              @relation(fields: [cartId], references: [id])
-  cartId          String
-  variant         ProductVariant    @relation(fields: [variantId], references: [id])
-  variantId       String
-  quantity        Int
+  id        String         @id @default(uuid())
+  cart      Cart           @relation(fields: [cartId], references: [id])
+  cartId    String
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+  variantId String
+  quantity  Int
 
   @@unique([cartId, variantId])
 }
 
 model PaymentMethod {
-  id              String            @id @default(uuid())
-  type            String            // e.g., 'credit_card', 'paypal', 'bank_transfer'
-  provider        String?           // e.g., 'visa', 'mastercard', 'paypal'
-  accountNumber   String?           // Last 4 digits for credit cards
-  expiryDate      DateTime?         // For credit cards
-  isDefault       Boolean           @default(false)
-  orders          Order[]
+  id                String   @id @default(uuid())
+  razorpayPaymentId String?
+  razorpayOrderId   String?
+  razorpaySignature String?
+  status            String
+  amount            Decimal  @db.Decimal(10, 2)
+  currency          String
+  order             Order?   @relation() // Removed `references` to avoid conflict
+  user              User     @relation(fields: [userId], references: [id])
+  userId            String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model Wishlist {
-  id              String            @id @default(uuid())
-  user            User              @relation(fields: [userId], references: [id])
-  userId          String            @unique
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  wishlistItems   WishlistItem[]
+  id            String         @id @default(uuid())
+  user          User           @relation(fields: [userId], references: [id])
+  userId        String         @unique
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  wishlistItems WishlistItem[]
 }
 
 model WishlistItem {
-  id              String            @id @default(uuid())
-  wishlist        Wishlist          @relation(fields: [wishlistId], references: [id])
-  wishlistId      String
-  product         Product           @relation(fields: [productId], references: [id])
-  productId       String
-  addedAt         DateTime          @default(now())
+  id         String   @id @default(uuid())
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id])
+  wishlistId String
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  String
+  addedAt    DateTime @default(now())
 
   @@unique([wishlistId, productId])
 }
