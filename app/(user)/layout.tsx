@@ -16,7 +16,7 @@ export default function UserLayout({
   const url = referer ? new URL(referer) : { pathname: "/" };
   const pathname = url.pathname || "/";
   return (
-    <div className="h-screen bg-gray-100">
+    <div className="h-screen ">
       <Navbar />
       <Suspense fallback={<LoadingSpinner />}>
         <main className="flex-1 overflow-y-auto p-5">{children}</main>
